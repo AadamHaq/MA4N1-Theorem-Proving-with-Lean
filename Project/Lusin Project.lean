@@ -15,14 +15,6 @@ K and the measure of A \ K is arbitrarily small.
 
 noncomputable section
 
-open MeasureTheory
-
-namespace MeasureTheory
-
-open Set Filter TopologicalSpace
-
-
-
 variable {α β: Type*}{m : MeasurableSpace ℝ } {n : MeasurableSpace ℝ }
 
 variable  {f : α → β}
