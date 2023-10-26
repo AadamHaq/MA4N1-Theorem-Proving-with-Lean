@@ -21,6 +21,10 @@ namespace MeasureTheory
 
 open Set Filter TopologicalSpace
 
-variable {α β ι : Type*} {m : MeasurableSpace α} [MetricSpace β] {μ : Measure α}
+
+
+variable {α β: Type*}{m : MeasurableSpace ℝ } {n : MeasurableSpace ℝ }
+
+variable  {f : α → β}
 
 namespace Lusin
