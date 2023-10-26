@@ -1,32 +1,20 @@
 import Mathlib.Tactic
-/-
-Copyright (c) 2022 Kexing Ying. All rights reserved.
-Released under Apache 2.0 license as described in the file LICENSE.
-Authors: Kexing Ying
--/
-
-import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
-#align_import measure_theory.function.egorov from "leanprover-community/mathlib"@"f2ce6086713c78a7f880485f7917ea547a215982"
 
 /-!
-# Egorov theorem
+# Lusin's theorem
 
-This file contains the Egorov theorem which states that an almost everywhere convergent
-sequence on a finite measure space converges uniformly except on an arbitrarily small set.
-This theorem is useful for the Vitali convergence theorem as well as theorems regarding
-convergence in measure.
+This file contains Lusin's theorem which put very simply and in the words of J. E. Littlewood,
+"every measurable function is nearly continuous". More precisely the statement of Lusin's theorem
+we will prove goes as follows: Let f be a  measureable function from a Euclidean space equipped with
+the Borel sigma-algebra to the Reals equipped with the Borel sigma-algebra. For any set A in the
+first sigma-algebra with finite  measure, there exists a compact set K, such that f is continuous on
+K and the measure of A \ K is arbitrarily small.
 
-## Main results
-
-* `MeasureTheory.Egorov`: Egorov's theorem which shows that a sequence of almost everywhere
-  convergent functions converges uniformly except on an arbitrarily small set.
-
--/
-
+!-/
 
 noncomputable section
 
-open Classical MeasureTheory NNReal ENNReal Topology
+open MeasureTheory
 
 namespace MeasureTheory
 
@@ -34,4 +22,4 @@ open Set Filter TopologicalSpace
 
 variable {α β ι : Type*} {m : MeasurableSpace α} [MetricSpace β] {μ : Measure α}
 
-namespace Egorov
+namespace Lusin
