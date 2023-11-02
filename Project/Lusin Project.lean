@@ -1,5 +1,7 @@
 import Mathlib.Tactic
 import Mathlib.MeasureTheory.MeasurableSpace.Basic
+import Mathlib.MeasureTheory.MeasurableSpace.Defs
+import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
 /-!
 # Lusin's theorem
