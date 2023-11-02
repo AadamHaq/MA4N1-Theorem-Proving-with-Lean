@@ -15,8 +15,9 @@ K and the measure of A \ K is arbitrarily small.
 
 noncomputable section
 
-variable {α β: Type*}{m : MeasurableSpace ℝ } {n : MeasurableSpace ℝ }
+variable {α β : Type*} {m : MeasurableSpace α} [MetricSpace β] {μ : MeasureTheory.Measure α}
 
-variable  {f : α → β}
+
+variable {f : α  → β }
 
 namespace Lusin
