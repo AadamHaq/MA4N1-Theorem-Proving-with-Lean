@@ -28,3 +28,14 @@ variable {f : α  → β }
 --instance Real.measurableSpace : MeasurableSpace ℝ  := borel ℝ 
 
 
+class T2LocComSpace  (X x : Type u) [TopologicalSpace X] : Prop where
+  /-- Every two points  a Hausdorff space admit disjoint open neighbourhoods. -/
+  t2 : ∀ x y, x ≠ y → ∃ u v : Set X, IsOpen u ∧ IsOpen v ∧ x ∈ u ∧ y ∈ v ∧ Disjoint u v
+  local_compact_nhds : ∀ (x : X), ∀ n ∈ 𝓝 x, ∃ s ∈ 𝓝 x, s ⊆ n ∧ IsCompact s
+
+
+
+
+
+
+
