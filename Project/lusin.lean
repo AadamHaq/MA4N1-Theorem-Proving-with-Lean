@@ -8,6 +8,9 @@ import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 --I added this import - it's used in the Egorov file so we probably need it
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
+-- for sequence indexing with τ
+import Mathlib.Init.Order.Defs
+
 
 open Nat Int Real Finset MeasureTheory
 open scoped Topology
