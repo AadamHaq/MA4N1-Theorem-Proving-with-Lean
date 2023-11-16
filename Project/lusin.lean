@@ -59,9 +59,11 @@ by exact isOpen_sUnion h
 instance T2LocComp  : MeasurableSpace X :=
  borel X
 
+-- Here we make our definition of the function 
+
+variable  {β : Type u} {m : MeasurableSpace X}{μ : Measure X} [MetricSpace ℝ] (f : α → β)
 
 
-example[ α : T2LocCompBorel X] [countable β] {f : α →  β}
 
 
 
