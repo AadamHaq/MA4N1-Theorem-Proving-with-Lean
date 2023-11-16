@@ -33,11 +33,11 @@ class T2LocallyCompactSpace (X : Type u) [TopologicalSpace X] : Prop where
   local_compact_nhds : ∀ (x : X), ∀ n ∈ 𝓝 x, ∃ s ∈ 𝓝 x, s ⊆ n ∧ IsCompact s
   t2 : ∀ (x y : X), x ≠ y → ∃ u v, IsOpen u ∧ IsOpen v ∧ x ∈ u ∧ y ∈ v ∧ Disjoint u v
 
-
+/- Old definition
 class T2LocallyCompactBorelSpace (X : Type*)[TopologicalSpace X] [T2LocallyCompactSpace X] [MeasurableSpace X] : Prop where
   /- The measurable sets are exactly the Borel-measurable sets. -/
   measurable_eq : ‹MeasurableSpace X› = borel X
-
+-/
 
 
 
