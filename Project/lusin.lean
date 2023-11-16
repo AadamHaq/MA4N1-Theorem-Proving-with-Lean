@@ -158,3 +158,6 @@ From proof in MA359 notes: the sequence of functions f_n := 2^-n * floor(2^n f) 
 -- Lusin's Theorem!
 
 theorem lusin {X : T2LocallyCompactSpace α} [Measure.Regular μ]
+theorem LusinonT2LocallyCompactSpace [measure.regular μ]
+ ∃ t, MeasurableSet t ∧ CompactSet t ∧ μ Set.diff a \ t ≤ ENNReal.ofReal ε ∧
+  Continuous Set.Restrict f t  := by sorry
