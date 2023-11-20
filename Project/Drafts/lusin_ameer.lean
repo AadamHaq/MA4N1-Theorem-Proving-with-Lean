@@ -138,13 +138,18 @@ Alternative to the above: if f : α → β is measurable with a,b ∈ β and a �
 
 -- theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → Set ℝ) (hm : ∀ i ∈ ι, MeasurableSet (a i)) : MeasurableSet (⋃ i, a i) := by sorry
 
-theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → ℝ)  : MeasurableSet (⋃ i, a i) := by sorry
+
+-- PROOF THAT GIOVANNI WANTS TO COMPLETE
+theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → ℝ) : MeasurableSet (⋃ i, {a i}) := by
+  refine MeasurableSet.iUnion ?h
+  intro b
+  refine IsClosed.measurableSet ?h.h
 
 
 
 -- theorem pre_image_of_singletons_is_open {α : Type u_1} {β : Type u_2} {f : α → β} [MeasurableSpace α] [TopologicalSpace α] [MeasurableSpace β] (hf : Measurable f) (B : Set β) (a b : B) (h : a ≠ b) : IsOpen ( f ⁻¹' (a ∨ b) ):= by
 
-theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [TopologicalSpace α] [BorelSpace α] [BorelSpace ℝ] (hf : Measurable f) (a : ℝ) : IsOpen ( f ⁻¹' ({a})) := by
+theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [TopologicalSpace α] [BorelSpace α] [BorelSpace ℝ] (hf : Measurable f) (a : Singleton) : IsOpen ( f ⁻¹' ({a})) := by
   refine isOpen_coinduced.mp ?_
   sorry
 
