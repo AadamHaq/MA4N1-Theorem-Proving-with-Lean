@@ -25,7 +25,7 @@ namespace MeasureTheory
 --Template copied from Egorov
 --variable {α β ι : Type*} {m : MeasurableSpace α} [n : MetricSpace β] {μ : Measure α}
 
-variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
+variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}[MeasurableSpace ℝ ][BorelSpace ℝ]
 
 class T2LocallyCompactSpace (X : Type u) [TopologicalSpace X] : Prop where
   /-- In a locally compact space,
