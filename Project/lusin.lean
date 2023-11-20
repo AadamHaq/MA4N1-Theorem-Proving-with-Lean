@@ -45,7 +45,6 @@ class T2LocallyCompactBorelSpace (X : Type*)[TopologicalSpace X] [T2LocallyCompa
 
 
 
-
 variable  {X : Type*} [TopologicalSpace X][t : T2LocallyCompactSpace X]
 
 --Checking that properties work as we would expect
@@ -156,6 +155,7 @@ theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [Topolog
 /-
 Intermediate lemma: if f is a measurable function with K = ⋃K_i for K_i disjoint compact sets, then f is constant on each K_i. Hence, f|K (i.e. f restricted to the set K) continuous.
 
+
 Useful resources:
 Restriction of a set to a function f: https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Set/Function.html#Set.restrict
 -/
@@ -164,7 +164,6 @@ Restriction of a set to a function f: https://leanprover-community.github.io/mat
 
 -- NOTE: in the below it may be better to use ℕ for sequence indexing rather than preorder/countable ι (that was just the convention that the Egorov proof followed)
 theorem measurable_func_constant_on_sets_is_continuous_on_union {α : Type u_1} {β : Type u_2} {c : β} {m1: MeasurableSpace α} {m2: TopologicalSpace α} {m3 : MeasurableSpace β} {f : α → β } {K : ι → set α} [Preorder ι] [Countable ι] (hf : Measurable f) (hcs : ∀ (i : ι), IsCompact (K i)) (hck : f (K i) = c) (hpd: ∀ (i : ι), Pairwise (Disjoint on K)) : (1=2) := by sorry
-
 
 /- Lusin's Theorem for measurable f which takes **countably many values**. Suppose that f takes countable many values {a_1,...,a_k}. Define A_k = f^-1(a_k) for each k, with A = ⋃ A_k.
 
@@ -189,7 +188,7 @@ From proof in MA359 notes: the sequence of functions f_n := 2^-n * floor(2^n f) 
 -/
 
 -- write uncountable f theorem here
-
+-- this may be related (but not the same!): https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Function/StronglyMeasurable/Basic.html#stronglyMeasurable_id
 
 
 -- Lusin's Theorem!
