@@ -21,54 +21,39 @@ open scoped Topology
 
 namespace MeasureTheory
 
+-- Calling universal variables
+-- Not sure about the second variable
+variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
+variable [MeasurableSpace ℝ][BorelSpace ℝ]
 
---Template copied from Egorov
---variable {α β ι : Type*} {m : MeasurableSpace α} [n : MetricSpace β] {μ : Measure α}
 
-variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}[MeasurableSpace ℝ ][BorelSpace ℝ]
+--Proof that a countable union of singletons in the Reals is measurable
 
-class T2LocallyCompactSpace (X : Type u) [TopologicalSpace X] : Prop where
-  /-- In a locally compact space,
-    every neighbourhood of every point contains a compact neighbourhood of that same point.
-    In a T2 space distinct points are contained within disjoint open sets--/
-  local_compact_nhds : ∀ (x : X), ∀ n ∈ 𝓝 x, ∃ s ∈ 𝓝 x, s ⊆ n ∧ IsCompact s
-  t2 : ∀ (x y : X), x ≠ y → ∃ u v, IsOpen u ∧ IsOpen v ∧ x ∈ u ∧ y ∈ v ∧ Disjoint u v
-
-/- Old definition
-class T2LocallyCompactBorelSpace (X : Type*)[TopologicalSpace X] [T2LocallyCompactSpace X] [MeasurableSpace X] : Prop where
-  /- The measurable sets are exactly the Borel-measurable sets. -/
-  measurable_eq : ‹MeasurableSpace X› = borel X
+/-theorem singleton_measurable (a : ℝ) : MeasurableSet ({a}) := by
+  refine IsClosed.measurableSet ?h.h
+  exact T1Space.t1 (a)
+  done
 -/
+theorem countable_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ) : MeasurableSet (⋃ i, {a i}) := by
+  refine MeasurableSet.iUnion ?h
+  intro b
+  refine IsClosed.measurableSet ?h.h
+  exact T1Space.t1 (a b)
+  done
 
 
 
+--- I tried to add the pre-image part to the theorem above, there seems to be a minor error that I can't get rid of 
 
+theorem preimage_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ)(f: α → ℝ)(hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+  apply MeasurableSpace.map_def.mp
+  refine MeasurableSet.iUnion ?h
+  intro b
+  refine IsClosed.measurableSet ?h.h
+  exact T1Space.t1 (a b)
+  done
+  
 
-
-variable  {X : Type*} [TopologicalSpace X][t : T2LocallyCompactSpace X]
-
---Checking that properties work as we would expect
-
-theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
-by exact IsOpen.union h₁ h₂
-theorem IsOpenUnion {s : Set (Set X)}  [T2LocallyCompactSpace X] (h: ∀ p ∈ s, IsOpen p) : IsOpen (⋃₀ s) :=
-by exact isOpen_sUnion h
-
--- there should be no errors above
-
-instance T2LocComp  : MeasurableSpace X :=
- borel X
-
--- Here we make our definition of the function 
-
-variable  {β : Type u} {m : MeasurableSpace X}{μ : Measure X} [MetricSpace ℝ] (f : α → β)
-
-
-
-
-
-
-/--variable {X: Type*} {m : T2LocallyCompactBorelSpace α} [MetricSpace ℝ] {μ : Measure.Regular α}--/
 
 
 -- pre-image of a measurable set under measurable f is measurable: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Basic.html#measurableSet_preimage
