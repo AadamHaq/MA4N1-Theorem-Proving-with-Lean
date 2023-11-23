@@ -5,10 +5,10 @@ import Mathlib.MeasureTheory.MeasurableSpace.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Defs
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
---I added this import - it's used in the Egorov file so we probably need it
+
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
--- for sequence indexing with τ
+-- for sequence indexing with ι
 import Mathlib.Init.Order.Defs
 
 
@@ -39,13 +39,10 @@ class T2LocallyCompactBorelSpace (X : Type*)[TopologicalSpace X] [T2LocallyCompa
   measurable_eq : ‹MeasurableSpace X› = borel X
 -/
 
+variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
+variable [BorelSpace ℝ] (f: α → ℝ)
+variable [Preorder ι] [Countable ι] (a : ι → ℝ)
 
-
-
-
-
-
-variable  {X : Type*} [TopologicalSpace X][t : T2LocallyCompactSpace X]
 
 --Checking that properties work as we would expect
 
@@ -61,14 +58,35 @@ instance T2LocComp  : MeasurableSpace X :=
 
 -- Here we make our definition of the function
 
-variable  {β : Type u} {m : MeasurableSpace X}{μ : Measure X} [MetricSpace ℝ] (f : α → β)
+
+-- We have defined a : ι → ℝ  i.e. a_1, a_2,...
+theorem countable_union_singleton_measurable : MeasurableSet (⋃ i, {a i}) := by
+  refine MeasurableSet.iUnion ?h
+  intro b
+  refine IsClosed.measurableSet ?h.h
+  exact T1Space.t1 (a b)
+  done
+
+
+theorem preimage_union_singleton_measurable  (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+  apply MeasurableSet.preimage  -- "undo" the preimage via a lemma that takes the measurability instances
+  · exact countable_union_singleton_measurable a
+  · exact hf
+  done
 
 
 
+-- theorem preimage_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ)(f: α → ℝ)(hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+--   apply MeasurableSpace.map_def.mp
+--   refine MeasurableSet.iUnion ?h
+--   intro b
+--   refine IsClosed.measurableSet ?h.h
+--   exact T1Space.t1 (a b)
+--   done
 
 
 
-/--variable {X: Type*} {m : T2LocallyCompactBorelSpace α} [MetricSpace ℝ] {μ : Measure.Regular α}--/
+--variable {X: Type*} {m : T2LocallyCompactBorelSpace α} [MetricSpace ℝ] {μ : Measure.Regular α}
 
 
 -- pre-image of a measurable set under measurable f is measurable: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Basic.html#measurableSet_preimage
@@ -99,7 +117,12 @@ Theorem: the countable union of compact sets is compact.
 
 -- e.g. "apply Mathlib.Topology.Compactness.Compact.isCompact_iUnion"
 
+-- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
+theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
+-- N ≤ n → |f n - a| < ε/2
 
+
+#check μ ∅
 
 /-
 Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A_k) for an increasing sequence of sets {A_k} with A = ⋃ A_k
@@ -139,11 +162,13 @@ Alternative to the above: if f : α → β is measurable with a,b ∈ β and a �
 -- theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → Set ℝ) (hm : ∀ i ∈ ι, MeasurableSet (a i)) : MeasurableSet (⋃ i, a i) := by sorry
 
 
--- PROOF THAT GIOVANNI WANTS TO COMPLETE
+/-
+--- TO DELETE ---
 theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → ℝ) : MeasurableSet (⋃ i, {a i}) := by
   refine MeasurableSet.iUnion ?h
   intro b
   refine IsClosed.measurableSet ?h.h
+
 
 
 
@@ -153,8 +178,8 @@ theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [Topolog
   refine isOpen_coinduced.mp ?_
   sorry
 
-
--- theorem pre_image_of_singletons_is_open {α : Type u_1} {f : α → ℝ} [TopologicalSpace α] [BorelSpace α] [BorelSpace ℝ] (hf : Measurable f) (a b : ℝ) (hd : a ≠ b) : IsOpen ( f ⁻¹' ({a ∪ b}) ):= by sorry
+--- END OF DELETED STUFF ---
+-/
 
 
 
