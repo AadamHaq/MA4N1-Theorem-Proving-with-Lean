@@ -127,15 +127,6 @@ theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ]
 
 
 
--- theorem pre_image_of_singletons_is_open {α : Type u_1} {β : Type u_2} {f : α → β} [MeasurableSpace α] [TopologicalSpace α] [MeasurableSpace β] (hf : Measurable f) (B : Set β) (a b : B) (h : a ≠ b) : IsOpen ( f ⁻¹' (a ∨ b) ):= by
-
-theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [TopologicalSpace α] [BorelSpace α] [BorelSpace ℝ] (hf : Measurable f) (a : ℝ) : IsOpen ( f ⁻¹' ({a})) := by
-  refine isOpen_coinduced.mp ?_
-  sorry
-
-
--- theorem pre_image_of_singletons_is_open {α : Type u_1} {f : α → ℝ} [TopologicalSpace α] [BorelSpace α] [BorelSpace ℝ] (hf : Measurable f) (a b : ℝ) (hd : a ≠ b) : IsOpen ( f ⁻¹' ({a ∪ b}) ):= by sorry
-
 
 /-
 Intermediate lemma: if f is a measurable function with K = ⋃K_i for K_i disjoint compact sets, then f is constant on each K_i. Hence, f|K (i.e. f restricted to the set K) continuous.
