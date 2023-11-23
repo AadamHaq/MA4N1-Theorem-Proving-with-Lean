@@ -26,6 +26,10 @@ variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α]
 variable [BorelSpace ℝ] (f: α → ℝ)
 variable [Preorder ι][Countable ι](a : ι → ℝ)
 
+theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
+by exact IsOpen.union h₁ h₂
+theorem IsOpenUnion {s : Set (Set X)}  [T2LocallyCompactSpace X] (h: ∀ p ∈ s, IsOpen p) : IsOpen (⋃₀ s) :=
+by exact isOpen_sUnion h
 
 theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
   exact MeasurableSet.singleton a
@@ -94,7 +98,12 @@ Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A
 
 -- e.g. "apply MeasureTheory.tendsto_measure_iUnion"
 
+-- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
+theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
+-- N ≤ n → |f n - a| < ε/2
 
+
+#check μ ∅
 
 /-
 Proposition 7.2.6 in Cohn's book [compactness-supremum characterisation of a set under a regular measure]: let X be a Hausdorff space endowed with the Borel σ-algebra B. Let μ be a regular measure on B.
