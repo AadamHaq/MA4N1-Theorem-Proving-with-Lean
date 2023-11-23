@@ -53,6 +53,19 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
   done
   
   
+--Result to take the union outside the pre-image
+theorem union_comes_out : f ⁻¹'(⋃ i, {a i}) = (⋃ i, f ⁻¹'{a i}) := by
+exact Set.preimage_iUnion
+
+
+--We define the following sets on which we will apply continuity of measure. 
+def Aa := f ⁻¹'(⋃ i, {a i})
+def A (i : ℕ ) := f ⁻¹'({a i})
+def B (k: ℕ ) := ( ⋃ i ∈ Set.Iic k , f ⁻¹'({a i}) )
+
+
+--Next goal is to show that B is an increasing sequence of sets 
+
 
 
 
