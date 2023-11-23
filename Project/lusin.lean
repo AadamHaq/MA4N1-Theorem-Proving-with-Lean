@@ -18,41 +18,41 @@ open scoped Topology
 -- aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
 -- this is slightly more restrictive than the theorem in Cohn's book
 
-
 namespace MeasureTheory
 
 -- Calling universal variables
 -- Not sure about the second variable
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
-variable [MeasurableSpace ℝ][BorelSpace ℝ]
+variable [BorelSpace ℝ] (f: α → ℝ)
+variable [Preorder ι][Countable ι](a : ι → ℝ)
 
+
+theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
+  exact MeasurableSet.singleton a
+  done
 
 --Proof that a countable union of singletons in the Reals is measurable
 
-/-theorem singleton_measurable (a : ℝ) : MeasurableSet ({a}) := by
-  refine IsClosed.measurableSet ?h.h
-  exact T1Space.t1 (a)
-  done
--/
-theorem countable_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ) : MeasurableSet (⋃ i, {a i}) := by
+theorem countable_union_singleton_measurable  : MeasurableSet (⋃ i, {a i}) := by
   refine MeasurableSet.iUnion ?h
   intro b
-  refine IsClosed.measurableSet ?h.h
-  exact T1Space.t1 (a b)
+  exact singleton_measurable (a b)
   done
 
 
 
---- I tried to add the pre-image part to the theorem above, there seems to be a minor error that I can't get rid of 
-
-theorem preimage_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ)(f: α → ℝ)(hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
-  apply MeasurableSpace.map_def.mp
-  refine MeasurableSet.iUnion ?h
-  intro b
-  refine IsClosed.measurableSet ?h.h
-  exact T1Space.t1 (a b)
+theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+  
+  apply MeasurableSet.preimage
+  exact countable_union_singleton_measurable a
+  exact hf
   done
   
+  
+
+
+
+
 
 
 
