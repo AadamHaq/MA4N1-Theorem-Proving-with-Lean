@@ -24,12 +24,13 @@ namespace MeasureTheory
 -- Not sure about the second variable
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
 variable [BorelSpace ℝ] (f: α → ℝ)
-variable [Preorder ι][Countable ι](a : ι → ℝ)
+variable[Preorder ℕ][Countable ℕ](a : ℕ → ℝ)
 
-theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
+/-theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
 by exact IsOpen.union h₁ h₂
 theorem IsOpenUnion {s : Set (Set X)}  [T2LocallyCompactSpace X] (h: ∀ p ∈ s, IsOpen p) : IsOpen (⋃₀ s) :=
 by exact isOpen_sUnion h
+-/
 
 theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
   exact MeasurableSet.singleton a
