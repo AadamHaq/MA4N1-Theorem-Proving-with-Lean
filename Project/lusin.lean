@@ -26,13 +26,11 @@ variable [BorelSpace ℝ] (f: α → ℝ)
 variable[Preorder ℕ][Countable ℕ](a : ℕ → ℝ)
 
 --Might not be needed but kept in case
-
 theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
   exact MeasurableSet.singleton a
   done
 
 --Proof that a countable union of singletons in the Reals is measurable
-
 theorem countable_union_singleton_measurable  : MeasurableSet (⋃ i, {a i}) := by
   refine MeasurableSet.iUnion ?h
   intro b
@@ -40,16 +38,13 @@ theorem countable_union_singleton_measurable  : MeasurableSet (⋃ i, {a i}) := 
   done
 
 --Proof that the pre-image of the above under a function from a measurable space to the Reals is measurable
-
 theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
-
   apply MeasurableSet.preimage
   exact countable_union_singleton_measurable a
   exact hf
   done
 
 --Result to take the union outside the pre-image
-
 theorem union_comes_out : f ⁻¹'(⋃ i, {a i}) = (⋃ i, f ⁻¹'{a i}) := by
 exact Set.preimage_iUnion
 done
@@ -77,17 +72,9 @@ theorem Partial_Union_increasing (x y : ℕ) (x y : Set.Icc 1 k) (hf : x < y): (
  sorry
 
 
-
-
-/-
-Theorem: the countable union of compact sets is compact.
--/
-
--- I think we want to invoke: https://leanprover-community.github.io/mathlib4_docs/Mathlib/Topology/Compactness/Compact.html#isCompact_iUnion
-
--- e.g. "apply Mathlib.Topology.Compactness.Compact.isCompact_iUnion"
-
-
+-- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
+theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
+-- N ≤ n → |f n - a| < ε/2
 
 /-
 Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A_k) for an increasing sequence of sets {A_k} with A = ⋃ A_k
@@ -99,19 +86,21 @@ Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A
 
 -- monotonicity needed https://leanprover-community.github.io/mathlib4_docs/Mathlib/Order/Monotone/Basic.html#Monotone
 
--- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
-theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
--- N ≤ n → |f n - a| < ε/2
-
-
-#check μ ∅
-
 /-
 Proposition 7.2.6 in Cohn's book [compactness-supremum characterisation of a set under a regular measure]: let X be a Hausdorff space endowed with the Borel σ-algebra B. Let μ be a regular measure on B.
 If A ∈ B (and A is σ-finite under μ) then μ(A) = sup{μ(K) : K ⊆ A, K compact}.
 -/
 
 -- class of regular functions in Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html#MeasureTheory.Measure.Regular note that there are definitions of inner regular and outer regular incorporated with this: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html
+
+/-
+Theorem: the countable union of compact sets is compact.
+-/
+
+-- I think we want to invoke: https://leanprover-community.github.io/mathlib4_docs/Mathlib/Topology/Compactness/Compact.html#isCompact_iUnion
+
+-- e.g. "apply Mathlib.Topology.Compactness.Compact.isCompact_iUnion"
+
 
 
 /-
@@ -125,13 +114,7 @@ Lemma: if f is a measurable function which is disjoint on the sets A and B, with
 
 --theorem disjoint_pair_with_constant_distinct_images_is_continuous_under_image_of_measurable_func {α : Type u_1} {β : Type u_2} {f : α → β} [MeasurableSpace α] [TopologicalSpace α] [MeasurableSpace β] {A : Set α} {B : Set α} (hf : Measurable f) (ha : MeasurableSet A) (hb : MeasurableSet B) (hd : Disjoint A B) (hi : ∀ a ∈ A, f a = 1) :  := by sorry
 
-/-
-Alternative to the above: if f : α → β is measurable with a,b ∈ β and a ≠ b, then f⁻¹(a ∨ b) is open.
--/
 
--- theorem singleton_in_Borel_sigma_algebra [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Singleton a] (a : ℝ) : (MeasurableSet a) := by
-
--- theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → Set ℝ) (hm : ∀ i ∈ ι, MeasurableSet (a i)) : MeasurableSet (⋃ i, a i) := by sorry
 
 
 /-
