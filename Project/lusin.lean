@@ -4,33 +4,28 @@ import Mathlib.Data.Real.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Defs
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
-
 --I added this import - it's used in the Egorov file so we probably need it
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
--- for sequence indexing with τ
+-- for sequence indexing with Natural Numbers 0, 1, 2, ... 
 import Mathlib.Init.Order.Defs
 
 
 open Nat Int Real Finset MeasureTheory
 open scoped Topology
 
--- aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
--- this is slightly more restrictive than the theorem in Cohn's book
+-- Aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
+-- This is slightly more restrictive than the theorem in Cohn's book
 
 namespace MeasureTheory
 
 -- Calling universal variables
--- Not sure about the second variable
+-- Will need to review what is needed
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
 variable [BorelSpace ℝ] (f: α → ℝ)
 variable[Preorder ℕ][Countable ℕ](a : ℕ → ℝ)
 
-/-theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
-by exact IsOpen.union h₁ h₂
-theorem IsOpenUnion {s : Set (Set X)}  [T2LocallyCompactSpace X] (h: ∀ p ∈ s, IsOpen p) : IsOpen (⋃₀ s) :=
-by exact isOpen_sUnion h
--/
+--Might not be needed but kept in case
 
 theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
   exact MeasurableSet.singleton a
@@ -44,7 +39,7 @@ theorem countable_union_singleton_measurable  : MeasurableSet (⋃ i, {a i}) := 
   exact singleton_measurable (a b)
   done
 
-
+--Proof that the pre-image of the above under a function from a measurable space to the Reals is measurable
 
 theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
 
@@ -53,12 +48,11 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
   exact hf
   done
 
-
 --Result to take the union outside the pre-image
+
 theorem union_comes_out : f ⁻¹'(⋃ i, {a i}) = (⋃ i, f ⁻¹'{a i}) := by
 exact Set.preimage_iUnion
 done
-
 
 --We define the following sets on which we will apply continuity of measure.
 
@@ -73,9 +67,9 @@ theorem Union_A_i_eq_union_A_i  : Union_A_i f a = ⋃ i, A_i f a i := by
  exact Set.preimage_iUnion
  done
 
--- Next we define the partial union of sets index from 1,2,...,k
-def Partial_Union_A_k ( k : ℕ ) := ( ⋃ i ∈ Set.Icc 1 k , f ⁻¹'({a i}) )
-
+-- Next we define the partial union of sets index from 0, 1,2,...,k 
+-- I think it needs to go from zero because the Natural Numbers here include zero
+def Partial_Union_A_k ( k : ℕ ) := ( ⋃ i ∈ Set.Icc 0 k , f ⁻¹'({a i}) )
 
 --Next goal is to show that B is an increasing sequence of sets
 theorem Partial_Union_increasing (x y : ℕ) (x y : Set.Icc 1 k) (hf : x < y): (Partial_Union_A_k f a x) ⊆ (Partial_Union_A_k f a y) := by
