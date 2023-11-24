@@ -47,50 +47,41 @@ theorem countable_union_singleton_measurable  : MeasurableSet (⋃ i, {a i}) := 
 
 
 theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
-  
+
   apply MeasurableSet.preimage
   exact countable_union_singleton_measurable a
   exact hf
   done
-  
-  
+
+
 --Result to take the union outside the pre-image
 theorem union_comes_out : f ⁻¹'(⋃ i, {a i}) = (⋃ i, f ⁻¹'{a i}) := by
 exact Set.preimage_iUnion
+done
 
 
---We define the following sets on which we will apply continuity of measure. 
-def Aa := f ⁻¹'(⋃ i, {a i})
-def A (i : ℕ ) := f ⁻¹'({a i})
-def B (k: ℕ ) := ( ⋃ i ∈ Set.Iic k , f ⁻¹'({a i}) )
+--We define the following sets on which we will apply continuity of measure.
+
+-- Union_A_i is the preimage of a countable union singletons under a measurable function
+def Union_A_i := f ⁻¹'(⋃ i, {a i})
+-- A_i is the preimage of a singleton under a measurable function. We select an i from our indexing set
+def A_i ( i : ℕ ) := f ⁻¹'({a i})
+
+-- Check that the Union_A_i is equal to the countable union of A i over N, as we'd expect
+theorem Union_A_i_eq_union_A_i  : Union_A_i f a = ⋃ i, A_i f a i := by
+ unfold Union_A_i A_i
+ exact Set.preimage_iUnion
+ done
+
+-- Next we define the partial union of sets index from 1,2,...,k
+def Partial_Union_A_k ( k : ℕ ) := ( ⋃ i ∈ Set.Icc 1 k , f ⁻¹'({a i}) )
 
 
---Next goal is to show that B is an increasing sequence of sets 
+--Next goal is to show that B is an increasing sequence of sets
+theorem Partial_Union_increasing (x y : ℕ) (x y : Set.Icc 1 k) (hf : x < y): (Partial_Union_A_k f a x) ⊆ (Partial_Union_A_k f a y) := by
+ unfold Partial_Union_A_k
+ sorry
 
-
-
-
-
-
-
-
--- pre-image of a measurable set under measurable f is measurable: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Basic.html#measurableSet_preimage
-
-
-/-
-Theorem: the pre-image of a **singleton** under f measurable is measurable
--/
-
--- result from Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Defs.html#MeasurableSingletonClass
-
--- e.g. "apply Mathlib.MeasureTheory.MeasurableSpace.Defs.measurableSet_singleton"
-
-
-/-
-Theorem: union of measurable sets is measurable.
--/
-
--- write mathlib reference here
 
 
 
@@ -111,6 +102,8 @@ Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A
 -- result from Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/MeasureSpace.html#MeasureTheory.tendsto_measure_iUnion
 
 -- e.g. "apply MeasureTheory.tendsto_measure_iUnion"
+
+-- monotonicity needed https://leanprover-community.github.io/mathlib4_docs/Mathlib/Order/Monotone/Basic.html#Monotone
 
 -- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
 theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
@@ -145,10 +138,6 @@ Alternative to the above: if f : α → β is measurable with a,b ∈ β and a �
 -- theorem singleton_in_Borel_sigma_algebra [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Singleton a] (a : ℝ) : (MeasurableSet a) := by
 
 -- theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → Set ℝ) (hm : ∀ i ∈ ι, MeasurableSet (a i)) : MeasurableSet (⋃ i, a i) := by sorry
-
-theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → ℝ)  : MeasurableSet (⋃ i, a i) := by sorry
-
-
 
 
 /-
