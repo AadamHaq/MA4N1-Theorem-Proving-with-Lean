@@ -23,7 +23,7 @@ namespace MeasureTheory
 -- Will need to review what is needed
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
 variable [BorelSpace ℝ] (f: α → ℝ)
-variable[Preorder ℕ][Countable ℕ](a : ℕ → ℝ)
+variable[Preorder ι ][Countable ι][IsDirected ι (· ≤ ·)](a : ι → ℝ)
 
 --Might not be needed but kept in case
 theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
@@ -44,37 +44,48 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
   exact hf
   done
 
---Result to take the union outside the pre-image
-theorem union_comes_out : f ⁻¹'(⋃ i, {a i}) = (⋃ i, f ⁻¹'{a i}) := by
-exact Set.preimage_iUnion
-done
-
 --We define the following sets on which we will apply continuity of measure.
 
 -- Union_A_i is the preimage of a countable union singletons under a measurable function
 def Union_A_i := f ⁻¹'(⋃ i, {a i})
 -- A_i is the preimage of a singleton under a measurable function. We select an i from our indexing set
-def A_i ( i : ℕ ) := f ⁻¹'({a i})
+def A_i (i : ι) := f ⁻¹'({a i})
+#check Union_A_i f a
+#check ⋃ i, A_i f a i
 
 -- Check that the Union_A_i is equal to the countable union of A i over N, as we'd expect
-theorem Union_A_i_eq_union_A_i  : Union_A_i f a = ⋃ i, A_i f a i := by
- unfold Union_A_i A_i
+theorem Union_A_i_eq_union_A_i  : f ⁻¹'(⋃ i, {a i}) = ⋃ i, f ⁻¹'({a i}) := by
  exact Set.preimage_iUnion
  done
 
--- Next we define the partial union of sets index from 0, 1,2,...,k 
--- I think it needs to go from zero because the Natural Numbers here include zero
-def Partial_Union_A_k ( k : ℕ ) := ( ⋃ i ∈ Set.Icc 0 k , f ⁻¹'({a i}) )
+-- Next we define the partial union of sets up to k 
+
+def Partial_Union_A_k (k : ι) := ⋃ i ∈ Set.Iic k , f ⁻¹'({a i})
 
 --Next goal is to show that B is an increasing sequence of sets
-theorem Partial_Union_increasing (x y : ℕ) (x y : Set.Icc 1 k) (hf : x < y): (Partial_Union_A_k f a x) ⊆ (Partial_Union_A_k f a y) := by
- unfold Partial_Union_A_k
+theorem Partial_Union_increasing (x y : ι) (hf : x ≤ y): (⋃ i ∈ Set.Iic x, f ⁻¹'({a i})) ⊆ (⋃ i ∈ Set.Iic y, f ⁻¹'({a i})) := by 
  sorry
 
 
 -- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
-theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
+
+theorem continuity_of_measure (ε  : ENNReal)  : ∃ N : ℕ , μ (f ⁻¹'(⋃ i, {a i})\⋃ i ∈ Set.Iic k , f ⁻¹'({a i})) < ε/2 := by
+apply?
+
 -- N ≤ n → |f n - a| < ε/2
+
+--The two below are useful
+/-
+theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Countable ι]
+    {s : ι → Set α} (hm : Monotone s) : Tendsto (μ ∘ s) atTop (𝓝 (μ (⋃ n, s n))) := by
+  rw [measure_iUnion_eq_iSup hm.directed_le]
+  exact tendsto_atTop_iSup fun n m hnm => measure_mono <| hm hnm
+#align measure_theory.tendsto_measure_Union MeasureTheory.tendsto_measure_iUnion
+
+def Monotone (f : α → β) : Prop :=
+  ∀ ⦃a b⦄, a ≤ b → f a ≤ f b
+#align monotone Monotone
+-/
 
 /-
 Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A_k) for an increasing sequence of sets {A_k} with A = ⋃ A_k
