@@ -22,8 +22,8 @@ namespace MeasureTheory
 -- Calling universal variables
 -- Will need to review what is needed
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
-variable [BorelSpace ℝ] (f: α → ℝ)
-variable[Preorder ι ][Countable ι][IsDirected ι (· ≤ ·)](a : ι → ℝ)
+variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ)
+
 
 --Might not be needed but kept in case
 theorem singleton_measurable (a : ℝ) : MeasurableSet ( {a}) := by
@@ -49,7 +49,7 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
 -- Union_A_i is the preimage of a countable union singletons under a measurable function
 def Union_A_i := f ⁻¹'(⋃ i, {a i})
 -- A_i is the preimage of a singleton under a measurable function. We select an i from our indexing set
-def A_i (i : ι) := f ⁻¹'({a i})
+def A_i (i : ℕ) := f ⁻¹'({a i})
 #check Union_A_i f a
 #check ⋃ i, A_i f a i
 
@@ -60,10 +60,10 @@ theorem Union_A_i_eq_union_A_i  : f ⁻¹'(⋃ i, {a i}) = ⋃ i, f ⁻¹'({a i}
 
 -- Next we define the partial union of sets up to k 
 
-def Partial_Union_A_k (k : ι) := ⋃ i ∈ Set.Iic k , f ⁻¹'({a i})
+def Partial_Union_A_k (k : ℕ) := ⋃ i ∈ Set.Iic k , f ⁻¹'({a i})
 
 --Next goal is to show that B is an increasing sequence of sets
-theorem Partial_Union_increasing (x y : ι) (hf : x ≤ y): (⋃ i ∈ Set.Iic x, f ⁻¹'({a i})) ⊆ (⋃ i ∈ Set.Iic y, f ⁻¹'({a i})) := by 
+theorem Partial_Union_increasing (x y : ℕ) (hf : x ≤ y): (⋃ i ∈ Set.Iic x, f ⁻¹'({a i})) ⊆ (⋃ i ∈ Set.Iic y, f ⁻¹'({a i})) := by 
  sorry
 
 
