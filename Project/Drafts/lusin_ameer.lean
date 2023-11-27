@@ -15,16 +15,7 @@ import Mathlib.Init.Order.Defs
 open Nat Int Real Finset MeasureTheory
 open scoped Topology
 
--- aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
--- this is slightly more restrictive than the theorem in Cohn's book
-
-
 namespace MeasureTheory
-
-
---Template copied from Egorov
---variable {α β ι : Type*} {m : MeasurableSpace α} [n : MetricSpace β] {μ : Measure α}
-
 
 class T2LocallyCompactSpace (X : Type u) [TopologicalSpace X] : Prop where
   /-- In a locally compact space,
@@ -39,12 +30,21 @@ class T2LocallyCompactBorelSpace (X : Type*)[TopologicalSpace X] [T2LocallyCompa
   measurable_eq : ‹MeasurableSpace X› = borel X
 -/
 
-variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
+variable  {α : Type*} [TopologicalSpace α] [T2Space α] [LocallyCompactSpace α] [MeasurableSpace α] [BorelSpace α] {μ : Measure α}
 variable [BorelSpace ℝ] (f: α → ℝ)
-variable [Preorder ι] [Countable ι] (a : ι → ℝ)
+-- variable [Preorder ι] [Countable ι] (a : ι → ℝ)
+variable (a : ℕ → ℝ)
 
+-- definitions from Giovanni:
+-- Union_A_i is the preimage of a countable union singletons under a measurable function
+def Union_A_i := f ⁻¹'(⋃ i, {a i})
+-- A_i is the preimage of a singleton under a measurable function. We select an i from our indexing set
+def A_i (i : ℕ) := f ⁻¹'({a i})
 
+/-
 --Checking that properties work as we would expect
+
+variable {X: Type*} {m : T2LocallyCompactBorelSpace α} [MetricSpace ℝ] {μ : Measure.Regular α}
 
 theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
 by exact IsOpen.union h₁ h₂
@@ -56,12 +56,12 @@ by exact isOpen_sUnion h
 instance T2LocComp  : MeasurableSpace X :=
  borel X
 
--- Here we make our definition of the function
+-/
 
 
 -- We have defined a : ι → ℝ  i.e. a_1, a_2,...
 theorem countable_union_singleton_measurable : MeasurableSet (⋃ i, {a i}) := by
-  refine MeasurableSet.iUnion ?h
+  refine MeasurableSet.iUnion ?hello
   intro b
   refine IsClosed.measurableSet ?h.h
   exact T1Space.t1 (a b)
@@ -75,19 +75,18 @@ theorem preimage_union_singleton_measurable  (hf : Measurable f) : MeasurableSet
   done
 
 
+-- OLD VERSION (using properties of T1 spaces)
+/-
+theorem preimage_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ)(f: α → ℝ)(hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+  apply MeasurableSpace.map_def.mp
+  refine MeasurableSet.iUnion ?h
+  intro b
+  refine IsClosed.measurableSet ?h.h
+  exact T1Space.t1 (a b)
+  done
+-/
 
--- theorem preimage_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ)(f: α → ℝ)(hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
---   apply MeasurableSpace.map_def.mp
---   refine MeasurableSet.iUnion ?h
---   intro b
---   refine IsClosed.measurableSet ?h.h
---   exact T1Space.t1 (a b)
---   done
-
-
-
---variable {X: Type*} {m : T2LocallyCompactBorelSpace α} [MetricSpace ℝ] {μ : Measure.Regular α}
-
+-- Ameer's docstrings
 
 -- pre-image of a measurable set under measurable f is measurable: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/MeasurableSpace/Basic.html#measurableSet_preimage
 
@@ -117,13 +116,6 @@ Theorem: the countable union of compact sets is compact.
 
 -- e.g. "apply Mathlib.Topology.Compactness.Compact.isCompact_iUnion"
 
--- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
-theorem continuity_of_measure (ε  : ENNReal) : ∃ N : ℝ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Icc 1 N, {a i})) < ε := by sorry
--- N ≤ n → |f n - a| < ε/2
-
-
-#check μ ∅
-
 /-
 Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A_k) for an increasing sequence of sets {A_k} with A = ⋃ A_k
 -/
@@ -133,13 +125,26 @@ Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A
 -- e.g. "apply MeasureTheory.tendsto_measure_iUnion"
 
 
+-- brute force epsilon usage (version used in proof)
+theorem continuity_of_measure (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
+  simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
+  -- Aadam is working on this proof!
+  sorry
+
+
+/-
+Next step: μ(A_n \ K_n) < ε/2n, where the A_k are defined as the pre-images of the {a_k} under f, and the K_k are compact subsets of the A_k.
+-/
+theorem compact_subsets_from_regular_measure (N : ℕ)  (K : ℕ → Set α) (hk : ∀ (i : ℕ), IsCompact (K i)) : ∀ i ∈ Set.Icc 1 N, ∃ i, (IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n)) := by sorry
+
 
 /-
 Proposition 7.2.6 in Cohn's book [compactness-supremum characterisation of a set under a regular measure]: let X be a Hausdorff space endowed with the Borel σ-algebra B. Let μ be a regular measure on B.
 If A ∈ B (and A is σ-finite under μ) then μ(A) = sup{μ(K) : K ⊆ A, K compact}.
 -/
 
--- class of regular functions in Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html#MeasureTheory.Measure.Regular note that there are definitions of inner regular and outer regular incorporated with this: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html
+-- class of regular functions in Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html#MeasureTheory.Measure.Regular
+-- note that there are definitions of inner regular and outer regular incorporated with this: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html
 
 
 /-
@@ -163,7 +168,7 @@ Alternative to the above: if f : α → β is measurable with a,b ∈ β and a �
 
 
 /-
---- TO DELETE ---
+--- OLD THEOREM STATEMENTS ---
 theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → ℝ) : MeasurableSet (⋃ i, {a i}) := by
   refine MeasurableSet.iUnion ?h
   intro b
@@ -178,7 +183,7 @@ theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [Topolog
   refine isOpen_coinduced.mp ?_
   sorry
 
---- END OF DELETED STUFF ---
+--- END OF OLD THEOREM STATEMENTS ---
 -/
 
 
