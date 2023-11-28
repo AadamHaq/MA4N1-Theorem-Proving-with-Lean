@@ -68,23 +68,12 @@ theorem countable_union_singleton_measurable : MeasurableSet (⋃ i, {a i}) := b
   done
 
 
-theorem preimage_union_singleton_measurable  (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
   apply MeasurableSet.preimage  -- "undo" the preimage via a lemma that takes the measurability instances
   · exact countable_union_singleton_measurable a
   · exact hf
   done
 
-
--- OLD VERSION (using properties of T1 spaces)
-/-
-theorem preimage_union_singleton_measurable [Preorder ι] [Countable ι] (a : ι → ℝ)(f: α → ℝ)(hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
-  apply MeasurableSpace.map_def.mp
-  refine MeasurableSet.iUnion ?h
-  intro b
-  refine IsClosed.measurableSet ?h.h
-  exact T1Space.t1 (a b)
-  done
--/
 
 -- Ameer's docstrings
 
@@ -110,22 +99,22 @@ Theorem: union of measurable sets is measurable.
 
 /-
 Theorem: the countable union of compact sets is compact.
--/
 
--- I think we want to invoke: https://leanprover-community.github.io/mathlib4_docs/Mathlib/Topology/Compactness/Compact.html#isCompact_iUnion
+-- For the proof, I think we will want to invoke: https://leanprover-community.github.io/mathlib4_docs/Mathlib/Topology/Compactness/Compact.html#isCompact_iUnion
 
 -- e.g. "apply Mathlib.Topology.Compactness.Compact.isCompact_iUnion"
+-/
+
+
 
 /-
 Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A_k) for an increasing sequence of sets {A_k} with A = ⋃ A_k
--/
 
 -- result from Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/MeasureSpace.html#MeasureTheory.tendsto_measure_iUnion
 
 -- e.g. "apply MeasureTheory.tendsto_measure_iUnion"
-
-
--- brute force epsilon usage (version used in proof)
+-/
+-- Theorem 1 of 3 for μ(A \ K) < ε for countable f
 theorem continuity_of_measure (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
   simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
   -- Aadam is working on this proof!
@@ -134,69 +123,57 @@ theorem continuity_of_measure (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'
 
 /-
 Next step: μ(A_n \ K_n) < ε/2n, where the A_k are defined as the pre-images of the {a_k} under f, and the K_k are compact subsets of the A_k.
+
+The N : ℕ given as a hypothesis below should is provided as a result from the continuity_of_measure theorem above.
 -/
-theorem compact_subsets_from_regular_measure (N : ℕ)  (K : ℕ → Set α) (hk : ∀ (i : ℕ), IsCompact (K i)) : ∀ i ∈ Set.Icc 1 N, ∃ i, (IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n)) := by sorry
+-- Theorem 2 of 3 for μ(A \ K) for countable f
+theorem compact_subsets_from_regular_measure (n : ℕ) (K : ℕ → Set α) : ∀ i ∈ Set.Icc 1 n, ∃ i, IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
+
+
+/-
+Final step involving A = ⋃ A_i, we now claim that the measure of A \ K is less than ε.
+-/
+-- Theorem 3 of 3 for μ(A \ K) < ε for countable f
+-- NEED TO FIX ISSUE WITH INDEX i
+theorem lusin_for_countable_f (n : ℕ) (K : ℕ → Set α) (hck : ∀ i ∈ Set.Icc 1 n, IsCompact (K i)) (hc : ∀ i ∈ Set.Icc 1 n, K i ⊂ f ⁻¹'{a i}) (hε : μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n)) : μ (⋃ i, f ⁻¹'{a i} \ ⋃ i, K i) < ε := by sorry
+
+
+/-
+The next step of the proof (for countable f) involves demonstrating that f is continuous when restricted to the K given by the above string of 3 proofs. We build up to this with some smaller lemma/theorem statements.
+-/
+
 
 
 /-
 Proposition 7.2.6 in Cohn's book [compactness-supremum characterisation of a set under a regular measure]: let X be a Hausdorff space endowed with the Borel σ-algebra B. Let μ be a regular measure on B.
 If A ∈ B (and A is σ-finite under μ) then μ(A) = sup{μ(K) : K ⊆ A, K compact}.
--/
 
 -- class of regular functions in Mathlib: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html#MeasureTheory.Measure.Regular
--- note that there are definitions of inner regular and outer regular incorporated with this: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html
 
+-- note that there are definitions of inner regular and outer regular incorporated with this: https://leanprover-community.github.io/mathlib4_docs/Mathlib/MeasureTheory/Measure/Regular.html
+-/
 
 /-
-Theorem (kinda obvious but may need a bitesize outline here): If K is a compact subset of a set A and f is constant on A, i.e. A = f^-1({a}) for a singleton {a}, then f is constant on K.
+Theorem (kinda obvious but may need a bitesize outline here): If K is a compact subset of a set A and f is constant on A, i.e. A = f^-1({a}) for a singleton {a}, then f is constant on K, i.e. f(K) = {a}.
 -/
+theorem preimage_of_const_func_on_compact_subset_is_constant (K : Set α) (a : ℝ) (hk : IsCompact K) (hs : K ⊂ f ⁻¹' ({a} : Set ℝ)) : (∀ x ∈ K, f x = a) := by sorry
 
 
 /-
 Lemma: if f is a measurable function which is disjoint on the sets A and B, with f constant on A and f constant on B, then f is continuous on A ⋃ B.
 -/
-
---theorem disjoint_pair_with_constant_distinct_images_is_continuous_under_image_of_measurable_func {α : Type u_1} {β : Type u_2} {f : α → β} [MeasurableSpace α] [TopologicalSpace α] [MeasurableSpace β] {A : Set α} {B : Set α} (hf : Measurable f) (ha : MeasurableSet A) (hb : MeasurableSet B) (hd : Disjoint A B) (hi : ∀ a ∈ A, f a = 1) :  := by sorry
-
-/-
-Alternative to the above: if f : α → β is measurable with a,b ∈ β and a ≠ b, then f⁻¹(a ∨ b) is open.
--/
-
--- theorem singleton_in_Borel_sigma_algebra [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Singleton a] (a : ℝ) : (MeasurableSet a) := by
-
--- theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → Set ℝ) (hm : ∀ i ∈ ι, MeasurableSet (a i)) : MeasurableSet (⋃ i, a i) := by sorry
+lemma meas_func_const_on_disjoint_pair_is_continuous (A B : Set α) (a b : ℝ) (hf : Measurable f) (ha : ∀ x : A, f x = a) (hb : ∀ x : B, f x = b) (hac : IsCompact A) (hbc : IsCompact B) (hd : A ∩ B = ∅) : ContinuousOn f (A∪B) := by sorry
 
 
 /-
---- OLD THEOREM STATEMENTS ---
-theorem countable_set_is_measurable [MeasurableSpace ℝ] [TopologicalSpace ℝ] [BorelSpace ℝ] [Preorder ι] [Countable ι] (a : ι → ℝ) : MeasurableSet (⋃ i, {a i}) := by
-  refine MeasurableSet.iUnion ?h
-  intro b
-  refine IsClosed.measurableSet ?h.h
-
-
-
-
--- theorem pre_image_of_singletons_is_open {α : Type u_1} {β : Type u_2} {f : α → β} [MeasurableSpace α] [TopologicalSpace α] [MeasurableSpace β] (hf : Measurable f) (B : Set β) (a b : B) (h : a ≠ b) : IsOpen ( f ⁻¹' (a ∨ b) ):= by
-
-theorem pre_image_of_singleton_is_open {α : Type u_1} {f : α → ℝ} [TopologicalSpace α] [BorelSpace α] [BorelSpace ℝ] (hf : Measurable f) (a : Singleton) : IsOpen ( f ⁻¹' ({a})) := by
-  refine isOpen_coinduced.mp ?_
-  sorry
-
---- END OF OLD THEOREM STATEMENTS ---
--/
-
-
-
-/-
-Intermediate lemma: if f is a measurable function with K = ⋃K_i for K_i disjoint compact sets, with f constant on each K_i, then f|K (i.e. f restricted to the set K) is continuous.
+Theorem using the above: if f is a measurable function and K_1,...,K_n are disjoint sets with K = ⋃ K_i, then f is continuous on K.
 
 Useful resources:
 Restriction of a set to a function f: https://leanprover-community.github.io/mathlib4_docs/Mathlib/Data/Set/Function.html#Set.restrict
 -/
+theorem meas_func_const_on_disjoint_finite_union_is_continuous (n : ℕ) (K : ℕ → Set α) (hpd: ∀ i ∈ Set.Icc 1 n, Pairwise (Disjoint on K i)) : ContinuousOn f (⋃ i ∈ Set.Icc 1 n, K i) := by sorry
 
--- NOTE: in the below it may be better to use ℕ for sequence indexing rather than preorder/countable ι (that was just the convention that the Egorov proof followed)
-theorem measurable_func_constant_on_sets_is_continuous_on_union {α : Type u_1} {β : Type u_2} {c : β} {m1: MeasurableSpace α} {m2: TopologicalSpace α} {m3 : MeasurableSpace β} {f : α → β } {K : ι → set α} [Preorder ι] [Countable ι] (hf : Measurable f) (hcs : ∀ (i : ι), IsCompact (K i)) (hck : f (K i) = c) (hpd: ∀ (i : ι), Pairwise (Disjoint on K)) : (1=2) := by sorry
+
 
 
 
@@ -229,7 +206,7 @@ From proof in MA359 notes: the sequence of functions f_n := 2^-n * floor(2^n f) 
 
 -- Lusin's Theorem!
 
-theorem lusin {X : T2LocallyCompactSpace α} [Measure.Regular μ]
-theorem LusinonT2LocallyCompactSpace [measure.regular μ]
- ∃ t, MeasurableSet t ∧ CompactSet t ∧ μ Set.diff a \ t ≤ ENNReal.ofReal ε ∧
-  Continuous Set.Restrict f t  := by sorry
+-- theorem lusin {X : T2LocallyCompactSpace α} [Measure.Regular μ]
+-- theorem LusinonT2LocallyCompactSpace [measure.regular μ]
+--  ∃ t, MeasurableSet t ∧ CompactSet t ∧ μ Set.diff a \ t ≤ ENNReal.ofReal ε ∧
+--   Continuous Set.Restrict f t  := by sorry
