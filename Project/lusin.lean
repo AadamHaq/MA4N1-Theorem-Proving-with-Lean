@@ -4,10 +4,8 @@ import Mathlib.Data.Real.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Defs
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
---I added this import - it's used in the Egorov file so we probably need it
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
--- for sequence indexing with Natural Numbers 0, 1, 2, ... 
 import Mathlib.Init.Order.Defs
 
 
@@ -49,20 +47,17 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
 -- These are the A_k as defined in the notes so A_k is referred to by A a f k 
 def A (i : ℕ ) := f ⁻¹'({a i})
 
-
 -- Check that the Union_A_i is equal to the countable union of A i over N, as we'd expect
 theorem f_union_eq_union_f  : f ⁻¹'(⋃ i, {a i}) = ⋃ i, A a f i  := by
  exact Set.preimage_iUnion
  done
 
 -- Next we define the partial union of sets up to k
-
 def Partial_Union_A  (k : ℕ ) := ⋃ i ∈ Set.Iic k , A a f i 
 ---def Partial_Union (k : ℕ ) := ⋃ i ∈ Set.Iic k , {a i}
 
 
-
---Next goal is to show that B is an increasing sequence of sets
+--Next goal is to show that B is an increasing sequence of sets (MIGHT NOT BE NEEDED)
 /-
 theorem Partial_Union_increasing (x y : ℕ) (hf : x ≤ y): (⋃ i ∈ Set.Iic x, f ⁻¹'({a i})) ⊆ (⋃ i ∈ Set.Iic y, f ⁻¹'({a i})) := by 
  sorry
@@ -75,17 +70,10 @@ unfold Monotone
 intro x y
 sorry 
 
-
-
-
--- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
-
 theorem continuity_of_measure (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
   simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
   -- Aadam is working on this proof!
   sorry
-
--- N ≤ n → |f n - a| < ε/2
 
 --The two below are useful
 /-
