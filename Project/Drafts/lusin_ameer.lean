@@ -5,14 +5,12 @@ import Mathlib.MeasureTheory.MeasurableSpace.Basic
 import Mathlib.MeasureTheory.MeasurableSpace.Defs
 import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 
-
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
 -- for sequence indexing with ι
 import Mathlib.Init.Order.Defs
 
-
-open Nat Int Real Finset MeasureTheory
+open Nat Int Real Finset MeasureTheory ENNReal Set Filter TopologicalSpace
 open scoped Topology
 
 namespace MeasureTheory
@@ -24,11 +22,6 @@ class T2LocallyCompactSpace (X : Type u) [TopologicalSpace X] : Prop where
   local_compact_nhds : ∀ (x : X), ∀ n ∈ 𝓝 x, ∃ s ∈ 𝓝 x, s ⊆ n ∧ IsCompact s
   t2 : ∀ (x y : X), x ≠ y → ∃ u v, IsOpen u ∧ IsOpen v ∧ x ∈ u ∧ y ∈ v ∧ Disjoint u v
 
-/- Old definition
-class T2LocallyCompactBorelSpace (X : Type*)[TopologicalSpace X] [T2LocallyCompactSpace X] [MeasurableSpace X] : Prop where
-  /- The measurable sets are exactly the Borel-measurable sets. -/
-  measurable_eq : ‹MeasurableSpace X› = borel X
--/
 
 variable  {α : Type*} [TopologicalSpace α] [T2Space α] [LocallyCompactSpace α] [MeasurableSpace α] [BorelSpace α] {μ : Measure α}
 variable [BorelSpace ℝ] (f: α → ℝ)
@@ -41,27 +34,12 @@ def Union_A_i := f ⁻¹'(⋃ i, {a i})
 -- A_i is the preimage of a singleton under a measurable function. We select an i from our indexing set
 def A_i (i : ℕ) := f ⁻¹'({a i})
 
-/-
---Checking that properties work as we would expect
-
-variable {X: Type*} {m : T2LocallyCompactBorelSpace α} [MetricSpace ℝ] {μ : Measure.Regular α}
-
-theorem IsOpenDoubleUnion  {s₁ : Set X} {s₂ : Set X} [T2LocallyCompactSpace X](h₁ : IsOpen s₁) (h₂ : IsOpen s₂) : IsOpen (s₁ ∪ s₂) :=
-by exact IsOpen.union h₁ h₂
-theorem IsOpenUnion {s : Set (Set X)}  [T2LocallyCompactSpace X] (h: ∀ p ∈ s, IsOpen p) : IsOpen (⋃₀ s) :=
-by exact isOpen_sUnion h
-
--- there should be no errors above
-
-instance T2LocComp  : MeasurableSpace X :=
- borel X
-
--/
+-- NEED TO ALSO SAY SOMEWHERE THAT μ(Union_A_i) < ∞.
 
 
 -- We have defined a : ι → ℝ  i.e. a_1, a_2,...
 theorem countable_union_singleton_measurable : MeasurableSet (⋃ i, {a i}) := by
-  refine MeasurableSet.iUnion ?hello
+  refine MeasurableSet.iUnion ?_
   intro b
   refine IsClosed.measurableSet ?h.h
   exact T1Space.t1 (a b)
@@ -106,6 +84,9 @@ Theorem: the countable union of compact sets is compact.
 -/
 
 
+-- NEED TO WORK ON THIS NEXT!
+theorem measure_notConvergentSeq_tendsto_zero  :
+    Tendsto (fun N => μ (⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) atTop (𝓝 0) := by sorry
 
 /-
 Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A_k) for an increasing sequence of sets {A_k} with A = ⋃ A_k
@@ -115,10 +96,11 @@ Proposition 1.2.5 in Cohn's book [continuity of measure]: μ(⋃ A_k) = lim μ(A
 -- e.g. "apply MeasureTheory.tendsto_measure_iUnion"
 -/
 -- Theorem 1 of 3 for μ(A \ K) < ε for countable f
-theorem continuity_of_measure (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
-  simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
-  -- Aadam is working on this proof!
-  sorry
+-- theorem continuity_of_measure (hm : (μ (f ⁻¹'(⋃ i, {a i}))) ≠ ∞) (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
+--   simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
+--   -- Aadam is working on this proof!
+--   sorry
+theorem continuity_of_measure (hε : 0 < ε) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ENNReal.ofReal (ε * 2⁻¹) := by sorry
 
 
 /-
@@ -127,7 +109,10 @@ Next step: μ(A_n \ K_n) < ε/2n, where the A_k are defined as the pre-images of
 The N : ℕ given as a hypothesis below should is provided as a result from the continuity_of_measure theorem above.
 -/
 -- Theorem 2 of 3 for μ(A \ K) for countable f
-theorem compact_subsets_from_regular_measure (n : ℕ) (K : ℕ → Set α) : ∀ i ∈ Set.Icc 1 n, ∃ i, IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
+-- We break this theorem down into two smaller lemmas
+lemma compact_subsets_from_regular_measure_condition_1 (n : ℕ) (K : ℕ → Set α) : ∃ i ∈ Set.Icc 1 n, K i ⊂ f ⁻¹'{a i} ∧ IsCompact (K i) := by sorry
+
+lemma compact_subsets_from_regular_measure_condition_2 (n : ℕ) (K : ℕ → Set α) (h1 : ∃ i ∈ Set.Icc 1 n, K i ⊂ f ⁻¹'{a i}) (h2 : IsCompact (K i)) : μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
 
 
 /-
@@ -135,14 +120,10 @@ Final step involving A = ⋃ A_i, we now claim that the measure of A \ K is less
 -/
 -- Theorem 3 of 3 for μ(A \ K) < ε for countable f
 -- NEED TO FIX ISSUE WITH INDEX i
-theorem lusin_for_countable_f (n : ℕ) (K : ℕ → Set α) (hck : ∀ i ∈ Set.Icc 1 n, IsCompact (K i)) (hc : ∀ i ∈ Set.Icc 1 n, K i ⊂ f ⁻¹'{a i}) (hε : μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n)) : μ (⋃ i, f ⁻¹'{a i} \ ⋃ i, K i) < ε := by sorry
+theorem measure_of_As_minus_Ks (n : ℕ) (K : ℕ → Set α) (hck : ∀ i ∈ Set.Icc 1 n, IsCompact (K i)) (hc : ∀ i ∈ Set.Icc 1 n, K i ⊂ f ⁻¹'{a i}) (hε : μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n)) : μ (⋃ i, f ⁻¹'{a i} \ ⋃ i, K i) < ε := by sorry
 
 
-/-
-The next step of the proof (for countable f) involves demonstrating that f is continuous when restricted to the K given by the above string of 3 proofs. We build up to this with some smaller lemma/theorem statements.
--/
-
-
+-- The next step of the proof (for countable f) involves demonstrating that f is continuous when restricted to the K given by the above string of 3 proofs. We build up to this with some smaller lemma/theorem statements.
 
 /-
 Proposition 7.2.6 in Cohn's book [compactness-supremum characterisation of a set under a regular measure]: let X be a Hausdorff space endowed with the Borel σ-algebra B. Let μ be a regular measure on B.
@@ -205,6 +186,7 @@ From proof in MA359 notes: the sequence of functions f_n := 2^-n * floor(2^n f) 
 
 
 -- Lusin's Theorem!
+theorem lusin (hf : μ )
 
 -- theorem lusin {X : T2LocallyCompactSpace α} [Measure.Regular μ]
 -- theorem LusinonT2LocallyCompactSpace [measure.regular μ]
