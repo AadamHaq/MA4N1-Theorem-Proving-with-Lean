@@ -46,25 +46,36 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
 
 --We define the following sets on which we will apply continuity of measure.
 
--- Union_A_i is the preimage of a countable union singletons under a measurable function
-def Union_A_i := f ⁻¹'(⋃ i, {a i})
--- A_i is the preimage of a singleton under a measurable function. We select an i from our indexing set
-def A_i (i : ℕ) := f ⁻¹'({a i})
-#check Union_A_i f a
-#check ⋃ i, A_i f a i
+-- These are the A_k as defined in the notes so A_k is referred to by A a f k 
+def A (i : ℕ ) := f ⁻¹'({a i})
+
 
 -- Check that the Union_A_i is equal to the countable union of A i over N, as we'd expect
-theorem Union_A_i_eq_union_A_i  : f ⁻¹'(⋃ i, {a i}) = ⋃ i, f ⁻¹'({a i}) := by
+theorem f_union_eq_union_f  : f ⁻¹'(⋃ i, {a i}) = ⋃ i, A a f i  := by
  exact Set.preimage_iUnion
  done
 
--- Next we define the partial union of sets up to k 
+-- Next we define the partial union of sets up to k
 
-def Partial_Union_A_k (k : ℕ) := ⋃ i ∈ Set.Iic k , f ⁻¹'({a i})
+def Partial_Union_A  (k : ℕ ) := ⋃ i ∈ Set.Iic k , A a f i 
+---def Partial_Union (k : ℕ ) := ⋃ i ∈ Set.Iic k , {a i}
+
+
 
 --Next goal is to show that B is an increasing sequence of sets
+/-
 theorem Partial_Union_increasing (x y : ℕ) (hf : x ≤ y): (⋃ i ∈ Set.Iic x, f ⁻¹'({a i})) ⊆ (⋃ i ∈ Set.Iic y, f ⁻¹'({a i})) := by 
  sorry
+-/
+
+
+theorem partial_union_increasing: Monotone (Partial_Union_A a f) := by
+unfold Partial_Union_A
+unfold Monotone
+intro x y
+sorry 
+
+
 
 
 -- theorem continuity_of_measure {A : ι → Set α} (hm : Monotone A) :
