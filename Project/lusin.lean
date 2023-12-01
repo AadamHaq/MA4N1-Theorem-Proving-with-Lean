@@ -22,6 +22,10 @@ variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α]
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ)
 variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 
+--Checking this works, DELETE LATER
+theorem check : Set.range a = ⋃ i, {a i} := by
+exact Set.range_eq_iUnion a
+done
 
 --Might not be needed but kept in case
 theorem singleton_measurable (a : ℝ) : MeasurableSet ({a}) := by
@@ -45,16 +49,11 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
 --We define the following sets on which we will apply continuity of measure.
 
 -- This is A_k as in the notes
--- !NOTE! We have an intersection 
-def Image_B_under_f := {f b | b ∈ B}
--- ∀ b ∈ B, ∃ i ∈ ℕ s.t. f(b) = ai
-
---variable [(Image_B_under_f f B) = (⋃ i, {a i})]
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
--- Check (CAN DELETE LATER)
-theorem f_union_eq_union_f  : f ⁻¹'(⋃ i, {a i}) ∩ B = ⋃ i, A f a B i  := by
- exact Set.preimage_iUnion
+-- Needs proof
+theorem B_eq_Union_Ai : B = ⋃ i, A f a B i  := by
+ sorry
  done
 
 -- Next we define the partial union of sets up to k
