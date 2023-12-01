@@ -20,7 +20,7 @@ namespace MeasureTheory
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ)
-variable (B : Set α)(hf : μ B ≠ ∞)(hcount : f '' B = range a)
+variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 
 
 --Might not be needed but kept in case
