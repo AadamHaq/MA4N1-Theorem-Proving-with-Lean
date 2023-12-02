@@ -19,7 +19,7 @@ namespace MeasureTheory
 
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
-variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ)
+variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ) (h: Measurable f)
 variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 
 --Checking this works, DELETE LATER
@@ -28,30 +28,19 @@ exact Set.range_eq_iUnion a
 done
 
 --Might not be needed but kept in case
-theorem singleton_measurable (a : ℝ) : MeasurableSet ({a}) := by
-  exact MeasurableSet.singleton a
-  done
-
---Proof that a countable union of singletons in the Reals is measurable
-theorem countable_union_singleton_measurable  : MeasurableSet (⋃ i, {a i}) := by
-  refine MeasurableSet.iUnion ?h
-  intro b
-  exact singleton_measurable (a b)
-  done
-
---Proof that the pre-image of the above under a function from a measurable space to the Reals is measurable
-theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet (f ⁻¹'(⋃ i, {a i})) := by
+theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i})) := by
   apply MeasurableSet.preimage
-  exact countable_union_singleton_measurable a
-  exact hf
+  exact MeasurableSet.singleton (a i)
+  exact h
   done
 
---We define the following sets on which we will apply continuity of measure.
 
--- This is A_k as in the notes
+-- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
+def Aa := ⋃ i, A f a B i
 
--- Showing that the union of Ai is equal to the original set B
+-- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B which is proven here
+
 theorem B_eq_Union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   rw[(Set.iUnion_inter B (fun i ↦ f ⁻¹'({a i}))).symm]
   rw[(Set.preimage_iUnion).symm]
@@ -62,16 +51,58 @@ theorem B_eq_Union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   done
 
 
--- Next we define the partial union of sets up to k
-def Partial_Union_A  (k : ℕ ) := ⋃ i ∈ Set.Iic k , A f a B i 
----def Partial_Union (k : ℕ ) := ⋃ i ∈ Set.Iic k , {a i}
 
---Next goal is to show that B is an Monotone sequence of sets 
-theorem partial_union_increasing: Monotone (Partial_Union_A f a B) := by
-unfold Partial_Union_A
+/-
+We will be applying continuity of measure to show that the measure of the partial unions of these sets
+converges up to the measure of Aa. Below we prove that the partial unions are an increasing sequence of
+measurable sets, the hypothesis of continuity of measure.
+-/
+theorem measurable_A: (MeasurableSet (A f a B i)) := by
+unfold A
+apply MeasurableSet.inter
+apply pre_im_singleton_measurable
+apply h
+exact hm
+done
+
+theorem measurable_Aa: (MeasurableSet (Aa f a B)) := by
+apply MeasurableSet.iUnion
+intro i
+apply measurable_A
+apply h
+exact hm
+done
+
+
+-- Next we show that the partial union of sets up to k is measurable
+theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B i )  := by
+apply Set.Finite.measurableSet_biUnion
+exact Set.finite_Iic k
+intro b
+exact fun x => measurable_A f a h B hm
+
+
+
+--Next goal is to show that the sequence of partial unions is increasing
+--The Monotone theorem works, but it requires "partial_union_increasing" which is sorry'd out.
+--mwe is basically the same as partial_union_increasing I just simplified the statement as much as possible
+
+theorem partial_union_increasing (s: ℕ → Set α)(k1 k2 : ℕ )(h: k1 ≤ k2): ⋃ i ∈ Set.Iic k1 ,  s i  ≤ ⋃ i ∈ Set.Iic k2 , s i  := by
+simp
+sorry
+
+
+theorem mwe (s: ℕ → Set α)(k i: ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k ,  s i := by
+unfold Set.Iic
+simp
+sorry
+
+
+theorem Monotone: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
 unfold Monotone
 intro x y
-sorry 
+apply partial_union_increasing
+
 
 /-
 theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Countable ι]
