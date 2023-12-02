@@ -51,10 +51,16 @@ theorem preimage_union_singleton_measurable (hf : Measurable f) : MeasurableSet 
 -- This is A_k as in the notes
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
--- Needs proof
-theorem B_eq_Union_Ai : B = ⋃ i, A f a B i  := by
- sorry
- done
+-- Showing that the union of Ai is equal to the original set B
+theorem B_eq_Union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
+  rw[(Set.iUnion_inter B (fun i ↦ f ⁻¹'({a i}))).symm]
+  rw[(Set.preimage_iUnion).symm]
+  rw[(Set.range_eq_iUnion a).symm]
+  rw[hcount.symm]
+  simp
+  simp_rw[Set.subset_preimage_image f B]
+  done
+
 
 -- Next we define the partial union of sets up to k
 def Partial_Union_A  (k : ℕ ) := ⋃ i ∈ Set.Iic k , A f a B i 
