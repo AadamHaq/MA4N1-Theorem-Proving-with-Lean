@@ -37,7 +37,6 @@ theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i}))
 
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
-def Aa := ⋃ i, A f a B i
 
 -- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B which is proven here
 
@@ -51,85 +50,71 @@ theorem B_eq_Union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   done
 
 
-
 /-
 We will be applying continuity of measure to show that the measure of the partial unions of these sets
 converges up to the measure of Aa. Below we prove that the partial unions are an increasing sequence of
 measurable sets, the hypothesis of continuity of measure.
 -/
 theorem measurable_A: (MeasurableSet (A f a B i)) := by
-unfold A
-apply MeasurableSet.inter
-apply pre_im_singleton_measurable
-apply h
-exact hm
-done
+  unfold A
+  apply MeasurableSet.inter
+  apply pre_im_singleton_measurable
+  apply h
+  exact hm
+  done
 
-theorem measurable_Aa: (MeasurableSet (Aa f a B)) := by
-apply MeasurableSet.iUnion
-intro i
-apply measurable_A
-apply h
-exact hm
-done
-
+theorem mmeasurable_A: (MeasurableSet (f ⁻¹'({a i}) ∩ B)) := by
+  apply MeasurableSet.inter
+  apply pre_im_singleton_measurable
+  apply h
+  exact hm
+  done
 
 -- Next we show that the partial union of sets up to k is measurable
 theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B i )  := by
-apply Set.Finite.measurableSet_biUnion
-exact Set.finite_Iic k
-intro b
-exact fun x => measurable_A f a h B hm
+  apply Set.Finite.measurableSet_biUnion
+  exact Set.finite_Iic k
+  intro b
+  exact fun _ => measurable_A f a h B hm
+  done
 
-
-
-
-
-
-
+theorem ppartial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , f ⁻¹'({a i}) ∩ B )  := by
+  apply Set.Finite.measurableSet_biUnion
+  exact Set.finite_Iic k 
+  intro b
+  exact fun _ => measurable_A f a h B hm 
+  done
 --Next goal is to show that the sequence of partial unions is increasing
 --The Monotone theorem works
 --Just need to apply mwe to prove partial_union_increasing
 
 
 
-theorem mwe (s: ℕ → Set α)(k i: ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k ,  s i := by
-unfold Set.Iic
-simp
-exact Set.subset_biUnion_of_mem hk
-done 
+theorem mwe (s: ℕ → Set α)(k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k, s i := by
+  simp
+  exact Set.subset_biUnion_of_mem hk 
+  done
 
+theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x ,  f ⁻¹'({a i}) ∩ B  ≤ ⋃ i ∈ Set.Iic y, f ⁻¹'({a i}) ∩ B  := by
+  simp 
+  intro j hj 
+  --rw[Nat.le_trans (j ≤ x) h ]
+  exact mwe (fun x ↦ ⋃ i ∈ Set.Iic x ,  f ⁻¹'({a i}) ∩ B) y
+  sorry
 
+theorem Monotone: Monotone (fun k => ⋃ i ∈ Set.Iic k , f ⁻¹'({a i}) ∩ B) := by
+  unfold Monotone
+  intro x y 
+  apply partial_union_increasing 
+  done
 
-theorem partial_union_increasing(s: ℕ → Set α)(x y  : ℕ )(h: x ≤ y): ⋃ i ∈ Set.Iic x ,  A f a B i  ≤ ⋃ i ∈ Set.Iic y, A f a B i  := by
-unfold Set.Iic
-simp
----apply mwe (A f a B) k1 k2 h
-intro j
-apply mwe s j k2 h
-sorry
-
-
-
-
-theorem Monotone: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
-unfold Monotone
-intro x y
-apply partial_union_increasing
-aesop
-done
-
-
-
-
-
---Attempt using partialSups 
+--Attempt using partialSups
 
 theorem partial_union_increasing_sup (s: ℕ → Set α)(x y : ℕ )(h: x ≤ y):
 partialSups s x  ≤  partialSups s y
  := by
 simp
----apply partialSups_mono 
+---apply partialSups_mono
 
 
 /-
