@@ -7,7 +7,7 @@ import Mathlib.MeasureTheory.Constructions.BorelSpace.Basic
 import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.Init.Order.Defs
-
+import Mathlib.Order.PartialSups
 
 open Nat Int Real Finset MeasureTheory ENNReal
 open scoped Topology
@@ -83,25 +83,53 @@ exact fun x => measurable_A f a h B hm
 
 
 
---Next goal is to show that the sequence of partial unions is increasing
---The Monotone theorem works, but it requires "partial_union_increasing" which is sorry'd out.
---mwe is basically the same as partial_union_increasing I just simplified the statement as much as possible
 
-theorem partial_union_increasing (s: ℕ → Set α)(k1 k2 : ℕ )(h: k1 ≤ k2): ⋃ i ∈ Set.Iic k1 ,  s i  ≤ ⋃ i ∈ Set.Iic k2 , s i  := by
-simp
-sorry
+
+
+
+--Next goal is to show that the sequence of partial unions is increasing
+--The Monotone theorem works
+--Just need to apply mwe to prove partial_union_increasing
+
 
 
 theorem mwe (s: ℕ → Set α)(k i: ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k ,  s i := by
 unfold Set.Iic
 simp
+exact Set.subset_biUnion_of_mem hk
+done 
+
+
+
+theorem partial_union_increasing(s: ℕ → Set α)(x y  : ℕ )(h: x ≤ y): ⋃ i ∈ Set.Iic x ,  A f a B i  ≤ ⋃ i ∈ Set.Iic y, A f a B i  := by
+unfold Set.Iic
+simp
+---apply mwe (A f a B) k1 k2 h
+intro j
+apply mwe s j k2 h
 sorry
+
+
 
 
 theorem Monotone: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
 unfold Monotone
 intro x y
 apply partial_union_increasing
+aesop
+done
+
+
+
+
+
+--Attempt using partialSups 
+
+theorem partial_union_increasing_sup (s: ℕ → Set α)(x y : ℕ )(h: x ≤ y):
+partialSups s x  ≤  partialSups s y
+ := by
+simp
+---apply partialSups_mono 
 
 
 /-
