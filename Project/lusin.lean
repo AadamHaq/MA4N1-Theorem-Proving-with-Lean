@@ -22,6 +22,10 @@ variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α]
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ) (h: Measurable f)
 variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 
+--Checking this works, DELETE LATER
+theorem check : Set.range a = ⋃ i, {a i} := by
+exact Set.range_eq_iUnion a
+done
 
 --Might not be needed but kept in case
 theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i})) := by
@@ -30,8 +34,10 @@ theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i}))
   exact h
   done
 
+
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
+def Aa := ⋃ i, A f a B i
 
 -- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B which is proven here
 
@@ -44,46 +50,71 @@ theorem B_eq_Union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   simp_rw[Set.subset_preimage_image f B]
   done
 
+
+
 /-
 We will be applying continuity of measure to show that the measure of the partial unions of these sets
 converges up to the measure of Aa. Below we prove that the partial unions are an increasing sequence of
 measurable sets, the hypothesis of continuity of measure.
 -/
-
-theorem Measurable_A: (MeasurableSet (f ⁻¹'({a i}) ∩ B)) := by
+theorem measurable_A: (MeasurableSet (A f a B i)) := by
+  unfold A
   apply MeasurableSet.inter
   apply pre_im_singleton_measurable
   apply h
   exact hm
   done
 
--- Next we show that the partial union of sets up to k is measurable
-theorem ppartial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , f ⁻¹'({a i}) ∩ B )  := by
-  apply Set.Finite.measurableSet_biUnion
-  exact Set.finite_Iic k
-  intro b
-  exact fun _ => Measurable_A f a h B hm
+theorem measurable_Aa: (MeasurableSet (Aa f a B)) := by
+  apply MeasurableSet.iUnion
+  intro i
+  apply measurable_A
+  apply h
+  exact hm
   done
 
 
---The following three theorems show that a partial union of sets is monotone
-theorem mwe (s: ℕ → Set α)(k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k, s i := by
+-- Next we show that the partial union of sets up to k is measurable
+theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B i )  := by
+  apply Set.Finite.measurableSet_biUnion
+  exact Set.finite_Iic k
+  intro b
+  exact fun x => measurable_A f a h B hm
+
+
+
+
+
+
+
+--Next goal is to show that the sequence of partial unions is increasing
+--The Monotone theorem works, but it requires "partial_union_increasing" which is sorried out.
+--mwe is basically the same as partial_union_increasing I just simplified the statement as much as possible
+
+
+
+theorem mwe (s: ℕ → Set α)(n k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k ,  s i := by
+  unfold Set.Iic
   simp
   exact Set.subset_biUnion_of_mem hk
   done
 
-theorem Partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x, f ⁻¹'({a i}) ∩ B ≤ ⋃ i ∈ Set.Iic y, f ⁻¹'({a i}) ∩ B  := by
+
+theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x, A f a B i  ≤ ⋃ i ∈ Set.Iic y, A f a B i  := by
   simp
   intro j hj
   have hy := hj.trans h
-  apply mwe (fun y ↦ f ⁻¹'({a y}) ∩ B) y hy
+  apply mwe (A f a B) j y hy
   done
 
-theorem Partial_union_monotone: Monotone (fun k ↦ ⋃ i ∈ Set.Iic k , f ⁻¹'({a i}) ∩ B) := by
+
+theorem Monotone: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   unfold Monotone
   intro x y
-  apply Partial_union_increasing
+  apply partial_union_increasing
   done
+
+
 
 /-
 theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Countable ι]
