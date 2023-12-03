@@ -108,12 +108,58 @@ theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x,
   done
 
 
-theorem Monotone: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
+theorem monotone_A: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   unfold Monotone
   intro x y
   apply partial_union_increasing
   done
 
+
+theorem monotone_Ax: Monotone ( A f a B) := by
+  sorry
+
+
+
+
+
+/-Attempt using partialSups
+
+theorem partial_union_increasing_sup (s: ℕ → Set α)(x y : ℕ )(h: x ≤ y):
+partialSups s x  ≤  partialSups s y
+ := by
+simp
+apply partialSups_mono
+-/
+
+
+theorem mwe_2 (s: ℕ → Set α) (i : ℕ): s i ⊆
+⋃ j ∈ Set.Iic i , s j  := by
+apply mwe
+rfl
+
+
+/-We need a result which says that the union of partial unions is just the union.
+This together with B_eq_Union_Ai will give us convergence up to μ(B) when we apply
+continuity of measure. -/
+
+
+theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
+ ⋃ i, (⋃ j ∈ Set.Iic i , s j ) := by
+  rw[superset_antisymm_iff]
+  constructor
+  simp
+  exact fun i i_1 i => Set.subset_iUnion s i_1
+  simp
+  intro t
+  have hj := mwe_2 s t
+  apply le_trans hj
+  exact Set.subset_iUnion (fun x => ⋃ (j : ℕ) (_ : j ∈ Set.Iic x), s j ) t
+
+
+
+theorem continuity_of_measure: Filter.Tendsto (↑↑μ ∘ (⋃ i ∈ Set.Iic k , A f a B i))
+  Filter.atTop (nhds (↑↑μ ∘ B)) := by
+apply?
 
 
 /-
@@ -124,7 +170,7 @@ theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Count
 #align measure_theory.tendsto_measure_Union MeasureTheory.tendsto_measure_iUnion
 -/
 
-theorem continuity_of_measure (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
+theorem measure_complement_to_zero (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
   simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
   -- Aadam is working on this proof!
   sorry
