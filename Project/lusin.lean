@@ -81,13 +81,8 @@ theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B
   apply Set.Finite.measurableSet_biUnion
   exact Set.finite_Iic k
   intro b
-  exact fun x => measurable_A f a h B hm
-
-
-
-
-
-
+  exact fun _ => measurable_A f a h B hm
+  done
 
 --Next goal is to show that the sequence of partial unions is increasing
 --The Monotone theorem works, but it requires "partial_union_increasing" which is sorried out.
@@ -117,6 +112,8 @@ theorem monotone_A: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   done
 
 
+theorem monotone_Ax: Monotone ( A f a B) := by
+  sorry
 
 /-Attempt using partialSups
 
@@ -150,13 +147,14 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
   have hj := mwe_2 s t
   apply le_trans hj
   exact Set.subset_iUnion (fun x => ⋃ (j : ℕ) (_ : j ∈ Set.Iic x), s j ) t
-
+  done
 
 theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
   rw[(union_partial_eq_union (A f a B)).symm]
   unfold A
   apply B_eq_union_Ai
   exact hcount
+  done
 
 ---this theorem should follow directly from tendsto_measure_iUnion and union_partial_A_eq_B
 
@@ -257,4 +255,3 @@ sorry
 
  ∃ t, MeasurableSet t ∧ CompactSet t ∧ μ Set.diff a \ t ≤ ENNReal.ofReal ε ∧
   Continuous Set.Restrict f t  := by sorry
-
