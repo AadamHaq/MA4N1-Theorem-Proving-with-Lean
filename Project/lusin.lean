@@ -129,7 +129,7 @@ theorem mwe_2 (s: ℕ → Set α) (i : ℕ): s i ⊆
 ⋃ j ∈ Set.Iic i , s j  := by
 apply mwe
 rfl
-
+done
 
 /-We need a result which says that the union of partial unions is just the union.
 This together with B_eq_Union_Ai will give us convergence up to μ(B) when we apply
