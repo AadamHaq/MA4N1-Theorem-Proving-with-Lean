@@ -144,6 +144,17 @@ theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Ii
   exact hcount
   done
 
+
+ theorem epsilon_tendsto (ε : ℝ ) (h : ε > 0)(s : ℕ → ℝ)(x: ℝ) (h2: Filter.Tendsto (s) Filter.atTop (nhds (x))) : ∃ N : ℕ, ∀ i ≥ N,  dist x (s i) <   ε := by
+ unfold Filter.Tendsto
+
+
+example : Filter.Tendsto (fun x : ℝ ↦ 1 / x) atTop (𝓝 0) := by
+  rw [Metric.tendsto_atTop]
+  -- ⊢ ∀ ε > 0, ∃ N, ∀ n ≥ N, dist (1 / n) 0 < ε
+  sorry
+
+
 theorem complement_to_zero (s: ℕ → Set α)(Y: Set α)(h1 : μ Y ≠ ∞)
 (h2: Filter.Tendsto (↑↑μ ∘ s) Filter.atTop (nhds (μ (⋃ (n : ℕ ), s n)))):
   Filter.Tendsto (μ ∘ Y) Filter.atTop (nhds (0)) := by
