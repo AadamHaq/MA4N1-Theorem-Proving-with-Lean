@@ -141,7 +141,7 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
   rw[superset_antisymm_iff]
   constructor
   simp
-  exact fun i i_1 i => Set.subset_iUnion s i_1
+  exact fun i i_1 _ => Set.subset_iUnion s i_1
   simp
   intro t
   have hj := mwe_2 s t
