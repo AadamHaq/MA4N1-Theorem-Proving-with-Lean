@@ -9,6 +9,8 @@ import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.Init.Order.Defs
 import Mathlib.Order.PartialSups
 
+import Mathlib.Order.Filter.Basic
+
 open Nat Int Real Finset MeasureTheory ENNReal
 open scoped Topology
 
@@ -41,7 +43,7 @@ def Aa := ⋃ i, A f a B i
 
 -- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B which is proven here
 
-theorem B_eq_Union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
+theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   rw[(Set.iUnion_inter B (fun i ↦ f ⁻¹'({a i}))).symm]
   rw[(Set.preimage_iUnion).symm]
   rw[(Set.range_eq_iUnion a).symm]
@@ -156,10 +158,23 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
   exact Set.subset_iUnion (fun x => ⋃ (j : ℕ) (_ : j ∈ Set.Iic x), s j ) t
 
 
+theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
+  rw[(union_partial_eq_union (A f a B)).symm]
+  unfold A
+  apply B_eq_union_Ai
+  exact hcount
 
-theorem continuity_of_measure: Filter.Tendsto (↑↑μ ∘ (⋃ i ∈ Set.Iic k , A f a B i))
-  Filter.atTop (nhds (↑↑μ ∘ B)) := by
-apply?
+---this theorem should follow directly from tendsto_measure_iUnion and union_partial_A_eq_B
+
+theorem continuity_of_measure(s: ℕ → Set α): Filter.Tendsto (↑↑μ ∘ (⋃ i ∈ Set.Iic k , s i ))
+Filter.atTop (nhds (↑↑μ (B))) := by
+sorry
+
+
+theorem complement_to_zero (s: ℕ → Set α)(Y: Set α)(h1 : μ Y ≠ ∞)
+(h2: Filter.Tendsto (↑↑μ ∘ s) Filter.atTop (nhds (μ (⋃ (n : ℕ ), s n)))):
+  Filter.Tendsto (μ ∘ Y) Filter.atTop (nhds (0)) := by
+  sorry
 
 
 /-
@@ -169,12 +184,12 @@ theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Count
   exact tendsto_atTop_iSup fun n m hnm => measure_mono <| hm hnm
 #align measure_theory.tendsto_measure_Union MeasureTheory.tendsto_measure_iUnion
 -/
-
+/-
 theorem measure_complement_to_zero (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
   simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
   -- Aadam is working on this proof!
   sorry
-
+-/
 
 -- Theorem 2 of 3 for μ(A \ K) for countable f
 theorem compact_subsets_from_regular_measure (n : ℕ) (K : ℕ → Set α) : ∀ i ∈ Set.Icc 1 n, ∃ i, IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
