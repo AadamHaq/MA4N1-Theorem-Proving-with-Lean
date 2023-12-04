@@ -39,7 +39,6 @@ theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i}))
 
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
-def Aa := ⋃ i, A f a B i
 
 -- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B which is proven here
 
@@ -66,15 +65,6 @@ theorem measurable_A: (MeasurableSet (A f a B i)) := by
   apply h
   exact hm
   done
-
-theorem measurable_Aa: (MeasurableSet (Aa f a B)) := by
-  apply MeasurableSet.iUnion
-  intro i
-  apply measurable_A
-  apply h
-  exact hm
-  done
-
 
 -- Next we show that the partial union of sets up to k is measurable
 theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B i )  := by
@@ -111,20 +101,6 @@ theorem monotone_A: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   apply partial_union_increasing
   done
 
-/-
-theorem monotone_Ax: Monotone ( A f a B) := by
-  sorry
--/
-
-/-Attempt using partialSups
-
-theorem partial_union_increasing_sup (s: ℕ → Set α)(x y : ℕ )(h: x ≤ y):
-partialSups s x  ≤  partialSups s y
- := by
-simp
-apply partialSups_mono
--/
-
 
 theorem mwe_2 (s: ℕ → Set α) (i : ℕ): s i ⊆
 ⋃ j ∈ Set.Iic i , s j  := by
@@ -159,12 +135,14 @@ theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
 
 ---this theorem should follow directly from tendsto_measure_iUnion and union_partial_A_eq_B
 
-theorem continuity_of_measure: Filter.Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
-Filter.atTop (𝓝 (μ (B))) := by
-simp only [Set.mem_Iic] 
-apply tendsto_measure_iUnion
-sorry
-
+theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
+  atTop (𝓝 (μ (B))) := by
+  nth_rw 2 [← union_partial_A_eq_B f a B] 
+  simp
+  apply tendsto_measure_iUnion  
+  apply monotone_A
+  exact hcount
+  done
 
 theorem complement_to_zero (s: ℕ → Set α)(Y: Set α)(h1 : μ Y ≠ ∞)
 (h2: Filter.Tendsto (↑↑μ ∘ s) Filter.atTop (nhds (μ (⋃ (n : ℕ ), s n)))):
