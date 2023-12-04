@@ -158,8 +158,10 @@ theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
 
 ---this theorem should follow directly from tendsto_measure_iUnion and union_partial_A_eq_B
 
-theorem continuity_of_measure(s: ℕ → Set α): Filter.Tendsto (↑↑μ ∘ (⋃ i ∈ Set.Iic k , s i ))
-Filter.atTop (nhds (↑↑μ (B))) := by
+theorem continuity_of_measure: Filter.Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
+Filter.atTop (𝓝 (μ (B))) := by
+simp only [Set.mem_Iic] 
+apply tendsto_measure_iUnion
 sorry
 
 
