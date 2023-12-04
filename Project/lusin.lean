@@ -111,9 +111,10 @@ theorem monotone_A: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   apply partial_union_increasing
   done
 
-
+/-
 theorem monotone_Ax: Monotone ( A f a B) := by
   sorry
+-/
 
 /-Attempt using partialSups
 
