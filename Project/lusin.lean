@@ -8,10 +8,11 @@ import Mathlib.MeasureTheory.Function.StronglyMeasurable.Basic
 import Mathlib.MeasureTheory.Measure.Regular
 import Mathlib.Init.Order.Defs
 import Mathlib.Order.PartialSups
+import Mathlib.Order.Filter.AtTopBot
 
 import Mathlib.Order.Filter.Basic
 
-open Nat Int Real Finset MeasureTheory ENNReal
+open Nat Int Real Finset MeasureTheory ENNReal Filter
 open scoped Topology
 
 -- Aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
@@ -137,21 +138,38 @@ theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
 
 theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
   atTop (𝓝 (μ (B))) := by
-  nth_rw 2 [← union_partial_A_eq_B f a B] 
+  nth_rw 2 [← union_partial_A_eq_B f a B]
   simp
-  apply tendsto_measure_iUnion  
+  apply tendsto_measure_iUnion
   apply monotone_A
   exact hcount
   done
 
+/-
+ theorem epsilon_tendsto (s : ℕ → ℝ)(x: ℝ) (h2: Tendsto (fun n : ℕ ↦ s n ) atTop (𝓝 x)): ∀ ε > 0,  ∃ N : ℕ, ∀ i ≥ N,  dist x (s i) <  ε := by
+ simp
+ rw [← zero_toReal]
+ ---rw [← Metric.tendsto_atTop]
+-/
 
- theorem epsilon_tendsto (ε : ℝ ) (h : ε > 0)(s : ℕ → ℝ)(x: ℝ) (h2: Filter.Tendsto (s) Filter.atTop (nhds (x))) : ∃ N : ℕ, ∀ i ≥ N,  dist x (s i) <   ε := by
- unfold Filter.Tendsto
+theorem epsilon_tendsto_2 (s : ℕ → ℝ) (x : ℝ) : Tendsto s atTop (𝓝 x) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, s n ∈ Set.Ioo (x - ε) (x + ε) := by
+  have : atTop.HasBasis (fun _ : ℕ ↦ True) Ici := atTop_basis
+  rw [this.tendsto_iff (nhds_basis_Ioo_pos x)]
+  simp
 
 
-example : Filter.Tendsto (fun x : ℝ ↦ 1 / x) atTop (𝓝 0) := by
+theorem epsilon {u : ℕ → X} {a : X} :
+    Tendsto u atTop (𝓝 a) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, dist (u n) a < ε :=
+  Metric.tendsto_atTop
+
+
+
+
+
+
+example Filter.Tendsto (f : fun x : ℝ ↦ 1 / x) atTop (𝓝 0) : ∃ N : ℕ, ∀ i ≥ N,  dist x (s i) <   ε := by
   rw [Metric.tendsto_atTop]
-  -- ⊢ ∀ ε > 0, ∃ N, ∀ n ≥ N, dist (1 / n) 0 < ε
+
   sorry
 
 
