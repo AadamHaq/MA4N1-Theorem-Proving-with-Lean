@@ -145,37 +145,40 @@ theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Ii
   exact hcount
   done
 
-/-
- theorem epsilon_tendsto (s : ℕ → ℝ)(x: ℝ) (h2: Tendsto (fun n : ℕ ↦ s n ) atTop (𝓝 x)): ∀ ε > 0,  ∃ N : ℕ, ∀ i ≥ N,  dist x (s i) <  ε := by
- simp
- rw [← zero_toReal]
- ---rw [← Metric.tendsto_atTop]
--/
 
-theorem epsilon_tendsto_2 (s : ℕ → ℝ) (x : ℝ) : Tendsto s atTop (𝓝 x) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, s n ∈ Set.Ioo (x - ε) (x + ε) := by
-  have : atTop.HasBasis (fun _ : ℕ ↦ True) Ici := atTop_basis
+
+theorem epsilon_tendsto (s : ℕ → ℝ) (x : ℝ) : Tendsto s atTop (𝓝 x) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, s n ∈ Set.Ioo (x - ε) (x + ε) := by
+  have : atTop.HasBasis (fun _ : ℕ ↦ True) Set.Ici := atTop_basis
   rw [this.tendsto_iff (nhds_basis_Ioo_pos x)]
-  simp
+  simp
 
 
-theorem epsilon {u : ℕ → X} {a : X} :
-    Tendsto u atTop (𝓝 a) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, dist (u n) a < ε :=
-  Metric.tendsto_atTop
+theorem distance (a b s: ℝ)(p: a < b )(h: s ∈ Set.Ioo (a) (b)) : a < s := by
+  aesop
 
 
+---This is the theorem we wanted to prove
+theorem epsilon_definition (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε  := by
+  rw[epsilon_tendsto] at hh
+  simp at hh
+  simp
+  exact hh
+  done
 
-
-
-
-example Filter.Tendsto (f : fun x : ℝ ↦ 1 / x) atTop (𝓝 0) : ∃ N : ℕ, ∀ i ≥ N,  dist x (s i) <   ε := by
-  rw [Metric.tendsto_atTop]
-
+ ---But we actually want this theorem - a weaker version of the above statement
+theorem epsilon_tendsto_WANT (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N,  x - ε < s N  := by
   sorry
 
 
-theorem complement_to_zero (s: ℕ → Set α)(Y: Set α)(h1 : μ Y ≠ ∞)
-(h2: Filter.Tendsto (↑↑μ ∘ s) Filter.atTop (nhds (μ (⋃ (n : ℕ ), s n)))):
-  Filter.Tendsto (μ ∘ Y) Filter.atTop (nhds (0)) := by
+/-This should just be a simple application of epsilon_tendsto_WANT onour
+specific sequence of measures-/
+theorem difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ENNReal.ofReal (ε / 2) := by
+  sorry
+
+
+--- This should just follow from the other results measure_diff_lt_of_lt_add
+
+theorem set_difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B \ ⋃ i ∈  Set.Iic N , A f a B i) ≤ ENNReal.ofReal (ε / 2) := by
   sorry
 
 
