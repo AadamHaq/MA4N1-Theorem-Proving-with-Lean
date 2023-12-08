@@ -25,18 +25,12 @@ variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α]
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ) (h: Measurable f)
 variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 
---Checking this works, DELETE LATER
-theorem check : Set.range a = ⋃ i, {a i} := by
-exact Set.range_eq_iUnion a
-done
-
 --Might not be needed but kept in case
 theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i})) := by
   apply MeasurableSet.preimage
   exact MeasurableSet.singleton (a i)
   exact h
   done
-
 
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
@@ -52,13 +46,12 @@ theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   simp_rw[Set.subset_preimage_image f B]
   done
 
-
-
 /-
 We will be applying continuity of measure to show that the measure of the partial unions of these sets
 converges up to the measure of Aa. Below we prove that the partial unions are an increasing sequence of
 measurable sets, the hypothesis of continuity of measure.
 -/
+
 theorem measurable_A: (MeasurableSet (A f a B i)) := by
   unfold A
   apply MeasurableSet.inter
@@ -79,29 +72,24 @@ theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B
 --The Monotone theorem works, but it requires "partial_union_increasing" which is sorried out.
 --mwe is basically the same as partial_union_increasing I just simplified the statement as much as possible
 
-
-
 theorem mwe (s: ℕ → Set α)(n k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k ,  s i := by
   unfold Set.Iic
   simp
   exact Set.subset_biUnion_of_mem hk
   done
 
-
-theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x, A f a B i  ≤ ⋃ i ∈ Set.Iic y, A f a B i  := by
+theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x, A f a B i  ≤ ⋃ i ∈ Set.Iic y, A f a B i := by
   simp
   intro j hj
   have hy := hj.trans h
   apply mwe (A f a B) j y hy
   done
 
-
 theorem monotone_A: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   unfold Monotone
   intro x y
   apply partial_union_increasing
   done
-
 
 theorem mwe_2 (s: ℕ → Set α) (i : ℕ): s i ⊆
 ⋃ j ∈ Set.Iic i , s j  := by
@@ -112,7 +100,6 @@ done
 /-We need a result which says that the union of partial unions is just the union.
 This together with B_eq_Union_Ai will give us convergence up to μ(B) when we apply
 continuity of measure. -/
-
 
 theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
  ⋃ i, (⋃ j ∈ Set.Iic i , s j ) := by
@@ -144,8 +131,6 @@ theorem continuity_of_measure: Tendsto (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , 
   apply monotone_A
   exact hcount
   done
-
-
 
 theorem epsilon_tendsto (s : ℕ → ℝ) (x : ℝ) : Tendsto s atTop (𝓝 x) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, s n ∈ Set.Ioo (x - ε) (x + ε) := by
   have : atTop.HasBasis (fun _ : ℕ ↦ True) Set.Ici := atTop_basis
@@ -184,27 +169,11 @@ theorem difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ 
   have  epsilon_tendsto_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))((μ (B)).toReal) (continuity_of_measure f a B hcount)
 
   
-
 --- This should just follow from the other results measure_diff_lt_of_lt_add
 
 theorem set_difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B \ ⋃ i ∈  Set.Iic N , A f a B i) ≤ ENNReal.ofReal (ε / 2) := by
   sorry
 
-
-
-/-
-theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Countable ι]
-    {s : ι → Set α} (hm : Monotone s) : Tendsto (μ ∘ s) atTop (𝓝 (μ (⋃ n, s n))) := by
-  rw [measure_iUnion_eq_iSup hm.directed_le]
-  exact tendsto_atTop_iSup fun n m hnm => measure_mono <| hm hnm
-#align measure_theory.tendsto_measure_Union MeasureTheory.tendsto_measure_iUnion
--/
-/-
-theorem measure_complement_to_zero (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
-  simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
-  -- Aadam is working on this proof!
-  sorry
--/
 
 -- Theorem 2 of 3 for μ(A \ K) for countable f
 theorem compact_subsets_from_regular_measure (n : ℕ) (K : ℕ → Set α) : ∀ i ∈ Set.Icc 1 n, ∃ i, IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
