@@ -136,7 +136,7 @@ theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
 
 ---this theorem should follow directly from tendsto_measure_iUnion and union_partial_A_eq_B
 
-theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
+theorem continuity_of_measure: Tendsto (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
   atTop (𝓝 (μ (B))) := by
   nth_rw 2 [← union_partial_A_eq_B f a B]
   simp
@@ -158,28 +158,38 @@ theorem distance (a b s: ℝ)(p: a < b )(h: s ∈ Set.Ioo (a) (b)) : a < s := by
 
 
 ---This is the theorem we wanted to prove
-theorem epsilon_definition (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε  := by
+theorem epsilon_definition (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε   := by
   rw[epsilon_tendsto] at hh
   simp at hh
   simp
   exact hh
   done
 
+theorem checksa (h: ε > 0  ) (s : ℕ → ℝ) (x : ℝ ) : (x - ε < s n ∧ s n < x + ε → x - ε < s n) := by
+  aesop 
+  
+
+
  ---But we actually want this theorem - a weaker version of the above statement
-theorem epsilon_tendsto_WANT (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N,  x - ε < s N  := by
+theorem epsilon_definition_WANT (s : ℕ → ENNReal) (x : ENNReal) (hx : x ≠ ∞) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N,  x - ε < s N  := by
   sorry
 
 
+
+#check continuity_of_measure
 /-This should just be a simple application of epsilon_tendsto_WANT onour
 specific sequence of measures-/
-theorem difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ENNReal.ofReal (ε / 2) := by
-  sorry
 
+theorem difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ENNReal.ofReal (ε / 2) := by
+  have  epsilon_tendsto_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))((μ (B)).toReal) (continuity_of_measure f a B hcount)
+
+  
 
 --- This should just follow from the other results measure_diff_lt_of_lt_add
 
 theorem set_difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B \ ⋃ i ∈  Set.Iic N , A f a B i) ≤ ENNReal.ofReal (ε / 2) := by
   sorry
+
 
 
 /-
