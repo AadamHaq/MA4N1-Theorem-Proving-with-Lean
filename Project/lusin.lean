@@ -21,7 +21,7 @@ open scoped Topology
 namespace MeasureTheory
 
 -- Calling universal variables
-variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}
+variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}[Measure.Regular μ]
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ) (h: Measurable f)
 variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 
