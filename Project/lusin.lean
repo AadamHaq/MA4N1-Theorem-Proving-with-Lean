@@ -23,7 +23,7 @@ namespace MeasureTheory
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}[Measure.Regular μ]
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ) (h: Measurable f)
-variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
+variable (B : Set α)(hm : MeasurableSet B)(hf : μ B < T)(hcount : f '' B = Set.range a)
 
 --Checking this works, DELETE LATER
 theorem check : Set.range a = ⋃ i, {a i} := by
@@ -81,9 +81,7 @@ theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B
 
 
 
-theorem mwe (s: ℕ → Set α)(n k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i ∈ Set.Iic k ,  s i := by
-  unfold Set.Iic
-  simp
+theorem mwe (s: ℕ → Set α)(n k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i, ⋃ (_ : i ≤ k), s i := by
   exact Set.subset_biUnion_of_mem hk
   done
 
@@ -134,9 +132,8 @@ theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
   exact hcount
   done
 
----this theorem should follow directly from tendsto_measure_iUnion and union_partial_A_eq_B
 
-theorem continuity_of_measure: Tendsto (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))
+theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i, ⋃ (_ : i ≤ k), A f a B i))
   atTop (𝓝 (μ (B))) := by
   nth_rw 2 [← union_partial_A_eq_B f a B]
   simp
@@ -151,60 +148,75 @@ theorem epsilon_tendsto (s : ℕ → ℝ) (x : ℝ) : Tendsto s atTop (𝓝 x) �
   have : atTop.HasBasis (fun _ : ℕ ↦ True) Set.Ici := atTop_basis
   rw [this.tendsto_iff (nhds_basis_Ioo_pos x)]
   simp
+  done
 
 
-theorem distance (a b s: ℝ)(p: a < b )(h: s ∈ Set.Ioo (a) (b)) : a < s := by
-  aesop
 
 
----This is the theorem we wanted to prove
-theorem epsilon_definition (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε   := by
+theorem epsilon_definition (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε   := by
   rw[epsilon_tendsto] at hh
   simp at hh
   simp
-  exact hh
+  apply hh
+  exact hε
   done
 
-theorem checksa (h: ε > 0  ) (s : ℕ → ℝ) (x : ℝ ) : (x - ε < s n ∧ s n < x + ε → x - ε < s n) := by
-  aesop 
-  
+---This result just weakens epsilon_definition just to get the left inequality
+theorem epsilon_definition_left (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N, ∀ n ≥ N,  x - ε < s n   := by
+  have hj :=  epsilon_definition ε hε s x hh
+  choose h1 h2 h3 using hj
+  aesop
+  done
 
 
- ---But we actually want this theorem - a weaker version of the above statement
-theorem epsilon_definition_WANT (s : ℕ → ENNReal) (x : ENNReal) (hx : x ≠ ∞) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N,  x - ε < s N  := by
+---We now want to weaken the result further going from ∃ N, ∀ n ≥ N, to just ∃ N
+---For this we need
+
+theorem existence (ε x : ℝ) (s: ℕ → ℝ)(hh: ∃ N, ∀ n ≥ N,  x - ε  < s n  ) : ( ∃ m,  x - ε < s m ) := by
+  rcases hh with ⟨ N, hN⟩
+  exact ⟨ N, hN _ le_rfl⟩
+  done
+
+
+theorem epsilon_definition_fixed_N (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N,  x - ε < s N   := by
+  have hj :=  epsilon_definition_left ε hε s x hh
+  exact existence  ε x s hj
+
+
+
+theorem epsilon_definition_WANT  (s : ℕ → ENNReal) (x : ENNReal) (hx : x < T) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N,  x - ε < s N  := by
+
   sorry
 
 
+theorem difference_le_epsilon : ∀ ε : ENNReal, ε > 0 → ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ε := by
+  ---exact epsilon_definition_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i)) (μ B) hf (continuity_of_measure f a B hcount)
+  have hr := epsilon_definition_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i)) (μ B) hf (continuity_of_measure f a B hcount)
+  simp at hr
+  unfold Set.Iic
+  simp
+  sorry
 
-#check continuity_of_measure
-/-This should just be a simple application of epsilon_tendsto_WANT onour
-specific sequence of measures-/
+theorem subset (N : ℕ) : ⋃ i ∈ Set.Iic N , A f a B i ⊆ B := by
+  unfold Set.Iic
+  unfold A
+  aesop
+  done
 
-theorem difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ENNReal.ofReal (ε / 2) := by
-  have  epsilon_tendsto_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i))((μ (B)).toReal) (continuity_of_measure f a B hcount)
+theorem finiteness_partial_union (N : ℕ) : μ (⋃ i ∈ Set.Iic N , A f a B i) < T  :=
+by
+  have hk := subset f a B N
+  exact (measure_mono hk).trans_lt hf
+  done
 
-  
+
 
 --- This should just follow from the other results measure_diff_lt_of_lt_add
 
-theorem set_difference_le_epsilon (hε : ε > 0 ) : ∃ N : ℕ, μ (B \ ⋃ i ∈  Set.Iic N , A f a B i) ≤ ENNReal.ofReal (ε / 2) := by
+theorem set_difference_le_epsilon (ε : ℝ) (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ENNReal.ofReal (ε) := by
+  exact measure_diff_lt_of_lt_add (partial_union_A_measurable f a h B hm ) (subset N) (finiteness_partial_union) (difference_le_epsilon f a B ε hε )
+
   sorry
-
-
-
-/-
-theorem tendsto_measure_iUnions [Preorder ι] [IsDirected ι (· ≤ ·)] [Countable ι]
-    {s : ι → Set α} (hm : Monotone s) : Tendsto (μ ∘ s) atTop (𝓝 (μ (⋃ n, s n))) := by
-  rw [measure_iUnion_eq_iSup hm.directed_le]
-  exact tendsto_atTop_iSup fun n m hnm => measure_mono <| hm hnm
-#align measure_theory.tendsto_measure_Union MeasureTheory.tendsto_measure_iUnion
--/
-/-
-theorem measure_complement_to_zero (ε : ENNReal) : ∃ N : ℕ, μ ((⋃ i, f ⁻¹'{a i}) \ f ⁻¹' (⋃ i ∈ Set.Icc 1 N, {a i})) < ε/2 := by
-  simp only [ge_iff_le, not_le, lt_one_iff, gt_iff_lt, Set.mem_Icc, Set.preimage_iUnion]
-  -- Aadam is working on this proof!
-  sorry
--/
 
 -- Theorem 2 of 3 for μ(A \ K) for countable f
 theorem compact_subsets_from_regular_measure (n : ℕ) (K : ℕ → Set α) : ∀ i ∈ Set.Icc 1 n, ∃ i, IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
