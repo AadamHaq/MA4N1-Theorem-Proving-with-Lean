@@ -24,11 +24,7 @@ namespace MeasureTheory
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α ][BorelSpace α]{μ : Measure α}[Measure.Regular μ]
 variable [BorelSpace ℝ] (f: α → ℝ) (a : ℕ → ℝ) (h: Measurable f)
 variable (B : Set α)(hm : MeasurableSet B)(hf : μ B < T)(hcount : f '' B = Set.range a)
-
---Checking this works, DELETE LATER
-theorem check : Set.range a = ⋃ i, {a i} := by
-exact Set.range_eq_iUnion a
-done
+variable (ε : NNReal )(hε : 0 < ε)
 
 --Might not be needed but kept in case
 theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i})) := by
@@ -36,7 +32,6 @@ theorem pre_im_singleton_measurable (i : ℕ ) : MeasurableSet (f ⁻¹'({a i}))
   exact MeasurableSet.singleton (a i)
   exact h
   done
-
 
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
@@ -52,8 +47,6 @@ theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   simp_rw[Set.subset_preimage_image f B]
   done
 
-
-
 /-
 We will be applying continuity of measure to show that the measure of the partial unions of these sets
 converges up to the measure of Aa. Below we prove that the partial unions are an increasing sequence of
@@ -68,7 +61,7 @@ theorem measurable_A: (MeasurableSet (A f a B i)) := by
   done
 
 -- Next we show that the partial union of sets up to k is measurable
-theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B i )  := by
+theorem partial_union_A_measurable (k : ℕ): MeasurableSet (⋃ i ∈ Set.Iic k , A f a B i )  := by
   apply Set.Finite.measurableSet_biUnion
   exact Set.finite_Iic k
   intro b
@@ -79,12 +72,9 @@ theorem partial_union_A_measurable: MeasurableSet (⋃ i ∈ Set.Iic k , A f a B
 --The Monotone theorem works, but it requires "partial_union_increasing" which is sorried out.
 --mwe is basically the same as partial_union_increasing I just simplified the statement as much as possible
 
-
-
 theorem mwe (s: ℕ → Set α)(n k : ℕ)(hk: n ≤ k ): s n ⊆ ⋃ i, ⋃ (_ : i ≤ k), s i := by
   exact Set.subset_biUnion_of_mem hk
   done
-
 
 theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x, A f a B i  ≤ ⋃ i ∈ Set.Iic y, A f a B i  := by
   simp
@@ -93,24 +83,21 @@ theorem partial_union_increasing (x y : ℕ) (h : x ≤ y): ⋃ i ∈ Set.Iic x,
   apply mwe (A f a B) j y hy
   done
 
-
 theorem monotone_A: Monotone (fun k => ⋃ i ∈ Set.Iic k , A f a B i) := by
   unfold Monotone
   intro x y
   apply partial_union_increasing
   done
 
-
 theorem mwe_2 (s: ℕ → Set α) (i : ℕ): s i ⊆
 ⋃ j ∈ Set.Iic i , s j  := by
-apply mwe
-rfl
-done
+  apply mwe
+  rfl
+  done
 
 /-We need a result which says that the union of partial unions is just the union.
 This together with B_eq_Union_Ai will give us convergence up to μ(B) when we apply
 continuity of measure. -/
-
 
 theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
  ⋃ i, (⋃ j ∈ Set.Iic i , s j ) := by
@@ -132,7 +119,6 @@ theorem union_partial_A_eq_B: ⋃ k,  ⋃ i ∈ Set.Iic k , A f a B i = B := by
   exact hcount
   done
 
-
 theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i, ⋃ (_ : i ≤ k), A f a B i))
   atTop (𝓝 (μ (B))) := by
   nth_rw 2 [← union_partial_A_eq_B f a B]
@@ -142,18 +128,13 @@ theorem continuity_of_measure: Tendsto (↑↑μ ∘ (fun k ↦ ⋃ i, ⋃ (_ : 
   exact hcount
   done
 
-
-
 theorem epsilon_tendsto (s : ℕ → ℝ) (x : ℝ) : Tendsto s atTop (𝓝 x) ↔ ∀ ε > 0, ∃ N, ∀ n ≥ N, s n ∈ Set.Ioo (x - ε) (x + ε) := by
   have : atTop.HasBasis (fun _ : ℕ ↦ True) Set.Ici := atTop_basis
   rw [this.tendsto_iff (nhds_basis_Ioo_pos x)]
   simp
   done
 
-
-
-
-theorem epsilon_definition (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε   := by
+theorem epsilon_definition (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N, ∀ n ≥ N,  x - ε < s n ∧ s n < x + ε   := by
   rw[epsilon_tendsto] at hh
   simp at hh
   simp
@@ -162,40 +143,57 @@ theorem epsilon_definition (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ)
   done
 
 ---This result just weakens epsilon_definition just to get the left inequality
-theorem epsilon_definition_left (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N, ∀ n ≥ N,  x - ε < s n   := by
+theorem epsilon_definition_left (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N, ∀ n ≥ N,  x - ε < s n   := by
   have hj :=  epsilon_definition ε hε s x hh
   choose h1 h2 h3 using hj
   aesop
   done
 
-
 ---We now want to weaken the result further going from ∃ N, ∀ n ≥ N, to just ∃ N
 ---For this we need
 
-theorem existence (ε x : ℝ) (s: ℕ → ℝ)(hh: ∃ N, ∀ n ≥ N,  x - ε  < s n  ) : ( ∃ m,  x - ε < s m ) := by
+theorem existence (x : ℝ) (s: ℕ → ℝ)(hh: ∃ N, ∀ n ≥ N,  x - ε  < s n  ) : ( ∃ m,  x - ε < s m ) := by
   rcases hh with ⟨ N, hN⟩
   exact ⟨ N, hN _ le_rfl⟩
   done
 
-
-theorem epsilon_definition_fixed_N (ε : ℝ) (hε  : ε > 0)(s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N,  x - ε < s N   := by
+theorem epsilon_definition_fixed_N (s : ℕ → ℝ) (x : ℝ) (hh : Tendsto s atTop (𝓝 x)) : ∃ N,  x - ε < s N   := by
   have hj :=  epsilon_definition_left ε hε s x hh
   exact existence  ε x s hj
 
 
+theorem epsilon_definition_WANT  (s : ℕ → ENNReal) (x : ENNReal) (hx : x < T) (hh : Tendsto s atTop (𝓝 x)) : ∃ N,  x - ε < s N  := by
+  sorry
 
-theorem epsilon_definition_WANT  (s : ℕ → ENNReal) (x : ENNReal) (hx : x < T) (hh : Tendsto s atTop (𝓝 x)) : ∀ ε > 0  , ∃ N,  x - ε < s N  := by
+theorem mwe_3 (s b: ENNReal)(e: NNReal) (h : b - e < s) : (b < s + e)  := by
+---rw[lt_sub_iff_add_lt b s e] at h
+---exact sub_lt_iff_lt_add.mp h
+---exact lt_add_of_tsub_lt_right h
+--ENNReal making this a pain to prove
 
   sorry
 
 
-theorem difference_le_epsilon : ∀ ε : ENNReal, ε > 0 → ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ε := by
-  ---exact epsilon_definition_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i)) (μ B) hf (continuity_of_measure f a B hcount)
-  have hr := epsilon_definition_WANT (μ ∘ (fun k ↦ ⋃ i ∈ Set.Iic k , A f a B i)) (μ B) hf (continuity_of_measure f a B hcount)
-  simp at hr
-  unfold Set.Iic
-  simp
-  sorry
+theorem mwe_4 (b : ENNReal ) (s: ℕ → ENNReal) (ht : ∃ N, b - ε < s N) :  (∃ N, b < s N + ε ) :=
+by
+  let ⟨n, Hn⟩ := ht
+  have hm := mwe_3 (s n) b ε Hn
+  aesop
+  done
+
+
+
+
+theorem difference_le_epsilon : ∃ N : ℕ, μ (B) < μ (⋃ i ∈ Set.Iic N , A f a B i) + ε := by
+
+     have hr := epsilon_definition_WANT ε (fun k ↦ μ (⋃ i ∈ Set.Iic k , A f a B i)) (μ B) hf (continuity_of_measure f a B hcount)
+     simp at hr
+     unfold Set.Iic
+     simp
+     exact mwe_4 ε (μ B) (fun k ↦ μ (⋃ i ∈ Set.Iic k , A f a B i)) hr
+
+
+---The next two theorems are required to apply the mathlib result measure_diff_lt_of_lt_add to obtain the set difference theorem
 
 theorem subset (N : ℕ) : ⋃ i ∈ Set.Iic N , A f a B i ⊆ B := by
   unfold Set.Iic
@@ -203,20 +201,25 @@ theorem subset (N : ℕ) : ⋃ i ∈ Set.Iic N , A f a B i ⊆ B := by
   aesop
   done
 
-theorem finiteness_partial_union (N : ℕ) : μ (⋃ i ∈ Set.Iic N , A f a B i) < T  :=
+theorem partial_union_finite (N : ℕ) : μ (⋃ i ∈ Set.Iic N , A f a B i) ≠  T  :=
 by
   have hk := subset f a B N
-  exact (measure_mono hk).trans_lt hf
+  have ht := (measure_mono hk).trans_lt hf
+  aesop
   done
 
+--- Now the final result follows from the other results using measure_diff_lt_of_lt_add
 
+theorem set_difference_le_epsilon : μ (B \ (⋃ i ∈ Set.Iic N , A f a B i)) < ε := by
+  have hs := difference_le_epsilon f a B hf hcount ε
+  let ⟨ N, hN ⟩ := hs
+  ---constructor
 
---- This should just follow from the other results measure_diff_lt_of_lt_add
-
-theorem set_difference_le_epsilon (ε : ℝ) (hε : ε > 0 ) : ∃ N : ℕ, μ (B) ≤ μ (⋃ i ∈ Set.Iic N , A f a B i) + ENNReal.ofReal (ε) := by
-  exact measure_diff_lt_of_lt_add (partial_union_A_measurable f a h B hm ) (subset N) (finiteness_partial_union) (difference_le_epsilon f a B ε hε )
-
+  ---have hy :=  measure_diff_lt_of_lt_add (partial_union_A_measurable f a h B hm N) (subset f a B N) (finite f a B hf N) hN
+  ---exact measure_diff_lt_of_lt_add (partial_union_A_measurable f a h B hm N) (subset f a B N) (partial_union_finite f a B hf N) hN
+  exact measure_diff_lt_of_lt_add (partial_union_A_measurable f a h B hm N) (subset f a B N) (partial_union_finite f a B hf N) hN
   sorry
+
 
 -- Theorem 2 of 3 for μ(A \ K) for countable f
 theorem compact_subsets_from_regular_measure (n : ℕ) (K : ℕ → Set α) : ∀ i ∈ Set.Icc 1 n, ∃ i, IsCompact (K i) ∧ K i ⊂ f ⁻¹'{a i} ∧ μ (f ⁻¹'{a i} \ K i) ≤ ε/(2*n) := by sorry
