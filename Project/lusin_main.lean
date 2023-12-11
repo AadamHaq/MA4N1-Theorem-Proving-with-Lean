@@ -27,11 +27,11 @@ variable (ε : ℝ)(hε: 0 < ε)
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
--- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B which is proven here
-
+-- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus
+-- ⋃ i A_i = B which is proven here
 theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   rw[← Set.iUnion_inter B (fun i ↦ f ⁻¹'({a i})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion a, ← hcount ]
-  simp
+  simp only [Set.inter_eq_right]
   simp_rw[Set.subset_preimage_image f B]
   done
 
@@ -95,7 +95,8 @@ theorem continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), 
   done
 
 --Ideally we want to get rid of hs and have it proved a nicer way
-theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) : ∃ k : ℕ, μ (B)  ≤  μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * 2⁻¹)  := by
+theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) : ∃ k : ℕ, μ (B)  ≤
+μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * 2⁻¹)  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
     (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * 2⁻¹)) (by
       rw [gt_iff_lt, ENNReal.ofReal_pos]
@@ -105,9 +106,9 @@ theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) : ∃ k : ℕ, μ (B)  ≤ 
   exact ⟨N, hy⟩
   done
 
---- These three results will be required to turns this result into a set difference
+--- These results will be required to turns this result into a set difference
 
-theorem partial_union_A_measurable (N : ℕ): MeasurableSet (⋃ i, ⋃ (_ : i ≤ N) , A f a B i )  := by
+theorem partial_union_A_measurable (N : ℕ): MeasurableSet (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
   apply Set.Finite.measurableSet_biUnion
   exact Set.finite_Iic N
   intro b
@@ -119,14 +120,16 @@ theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   aesop
   done
 
---The final result 
-theorem set_difference_epsilon (N : ℕ ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ, μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
+--The final result
+theorem set_difference_epsilon (N : ℕ ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ,
+μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
   have ht := difference_epsilon μ f a B hf hcount ε hε hs
   let ⟨ k, h4 ⟩ := ht
-  have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k) (ne_top_of_lt ( LE.le.trans_lt (measure_mono (subset f a B k)) (Ne.lt_top hf))) 
+  have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k)
+    (ne_top_of_lt (LE.le.trans_lt (measure_mono (subset f a B k)) (Ne.lt_top hf)))
   have h5 := tsub_le_iff_left.mpr h4
   rw[← hq] at h5
-  exact ⟨ k, h5 ⟩   
-  done 
+  exact ⟨ k, h5 ⟩
+  done
 
 --Now compact sets
