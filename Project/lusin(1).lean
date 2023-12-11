@@ -113,20 +113,16 @@ theorem union_partial_A_eq_B1: B \ ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k) , A f a B i 
   exact (B_eq_union_Ai f a B hcount).symm
   done
 
-theorem epsilon1  : ∃ k : ℕ, μ (B) - ε  ≤  μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) := by
+theorem difference_epsilon  : ∃ k : ℕ, μ (B)  ≤  μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ε  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
     (continuity_of_measure μ f a B hcount) ε (by
       rw [gt_iff_lt]
       exact hε )
-  exact ⟨N, (hN N le_rfl).1⟩
+  ---exact ⟨N, (hN N le_rfl).1⟩
+  have hl := (hN N le_rfl).1
+  have hy := tsub_le_iff_right.mp hl
+  exact ⟨ N, hy ⟩
   done
-
----Move epsilon to the other side
-theorem epsilon2  : ∃ k : ℕ, μ (B) ≤ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ε  := by
-  have ⟨ N, hN ⟩ := epsilon1 μ f a B hf hcount ε hε
-  have hy := tsub_le_iff_right.mp hN
-  aesop
-
 
 
 --- These three results will be required to turns this result into a set difference
@@ -151,13 +147,13 @@ by
   aesop
   done
 
-
-theorem epsilon3 (k:ℕ ): ∃ k : ℕ, μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤  ε := by
-  have hs := epsilon2 μ f a B hf hcount ε hε hj
+theorem set_difference_epsilon (k:ℕ ): ∃ k : ℕ, μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤  ε := by
+  have hs := difference_epsilon μ f a B hf hcount ε hε
   let ⟨ M, h4 ⟩ := hs
   have h1 := subset f a B M
   have h2 := partial_union_A_measurable f a h B hm M
   have h3 := finite μ f a B hf2 ε hj M
   have hq := measure_diff h1 h2 h3
   --- hq should prove the theorem
+
 
