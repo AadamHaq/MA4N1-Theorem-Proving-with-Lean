@@ -53,8 +53,6 @@ theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
   done
 
 --Next goal is to show that the sequence of partial unions is increasing
---The Monotone theorem works, but it requires "partial_union_increasing" which is sorried out.
---mwe is basically the same as partial_union_increasing I just simplified the statement as much as possible
 
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
