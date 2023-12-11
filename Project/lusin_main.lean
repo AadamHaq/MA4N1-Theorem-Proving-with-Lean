@@ -21,7 +21,7 @@ namespace Lusin
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
 variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (h: Measurable f)
-variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hf2 : μ B < ∞)(hcount : f '' B = Set.range a)
+variable (B : Set α)(hm : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
 -- We define the sequence of sets A_i as follows
@@ -94,7 +94,8 @@ theorem continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), 
   apply monotone_A
   done
 
-theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) (hε : (ε : ℝ ) > 0) : ∃ k : ℕ, μ (B)  ≤  μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * 2⁻¹)  := by
+--Ideally we want to get rid of hs and have it proved a nicer way
+theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) : ∃ k : ℕ, μ (B)  ≤  μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * 2⁻¹)  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
     (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * 2⁻¹)) (by
       rw [gt_iff_lt, ENNReal.ofReal_pos]
@@ -118,16 +119,14 @@ theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   aesop
   done
 
-theorem finite (N : ℕ ): μ (⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≠  ∞ := by
-  have hk := subset f a B N
-  have ht := (measure_mono hk).trans_lt hf2
-  aesop
-  done
-
-theorem set_difference_epsilon (k: ℕ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ, μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
-  have ht := difference_epsilon μ f a B hf hcount ε hs hε
+--The final result 
+theorem set_difference_epsilon (N : ℕ ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ, μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
+  have ht := difference_epsilon μ f a B hf hcount ε hε hs
   let ⟨ k, h4 ⟩ := ht
-  have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k) (finite μ f a B hf2 k)
+  have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k) (ne_top_of_lt ( LE.le.trans_lt (measure_mono (subset f a B k)) (Ne.lt_top hf))) 
   have h5 := tsub_le_iff_left.mpr h4
   rw[← hq] at h5
-  exact ⟨ k, h5 ⟩  
+  exact ⟨ k, h5 ⟩   
+  done 
+
+--Now compact sets
