@@ -128,3 +128,6 @@ theorem set_difference_epsilon (k: ℕ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ, 
   have ht := difference_epsilon μ f a B hf hcount ε hs hε
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k) (finite μ f a B hf2 k)
+  have h5 := tsub_le_iff_left.mpr h4
+  rw[← hq] at h5
+  exact ⟨ k, h5 ⟩  
