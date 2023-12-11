@@ -120,15 +120,14 @@ theorem epsilon1  : ∃ k : ℕ, μ (B) - ε  ≤  μ (⋃ i, ⋃ (_ : i ≤ k),
       exact hε )
   exact ⟨N, (hN N le_rfl).1⟩
   done
---- Technical issue with moving the epsilon over to the other side
 
-theorem mwe3 (a b e : ENNReal) (h : e < T ) (hk: b - e ≤ a ) : (b ≤ a + e) := by
-exact tsub_le_iff_right.mp hk
-
+---Move epsilon to the other side
 theorem epsilon2  : ∃ k : ℕ, μ (B) ≤ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ε  := by
   have ⟨ N, hN ⟩ := epsilon1 μ f a B hf hcount ε hε
-  have hy := mwe3 (μ (⋃ i, ⋃ (_ : i ≤ N), A f a B i)) (μ B) ε hj hN
+  have hy := tsub_le_iff_right.mp hN
   aesop
+
+
 
 --- These three results will be required to turns this result into a set difference
 
