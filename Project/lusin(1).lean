@@ -36,9 +36,9 @@ theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   simp_rw[Set.subset_preimage_image f B]
   done
 
-/-
-Here we show some sets are measurable for later use
--/
+
+--Here we show some sets are measurable for later use
+
 theorem measurable_A : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
   intro b
   apply MeasurableSet.inter
@@ -48,6 +48,7 @@ theorem measurable_A : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
   exact hm
   done
 
+--We can just use 'MeasurableSet.iUnion (measurable_A f a h B hm)' later and then delete this
 theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
   apply MeasurableSet.iUnion (measurable_A f a h B hm)
   done
@@ -68,10 +69,6 @@ theorem mwe_2 (s: ℕ → Set α) (j : ℕ): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , 
   apply Set.subset_biUnion_of_mem
   apply Nat.le_refl
   done
-
-/-We need a result which says that the union of partial unions is just the union.
-This together with B_eq_Union_Ai will give us convergence up to μ(B) when we apply
-continuity of measure. -/
 
 theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
  ⋃ i, (⋃ j, ⋃ (_ : j ≤ i) , s j ) := by
@@ -138,8 +135,7 @@ theorem subset (N : ℕ) : ⋃ i ∈ Set.Iic N , A f a B i ⊆ B := by
   aesop
   done
 
-theorem finite (N : ℕ ): μ (⋃ i ∈ Set.Iic N , A f a B i) ≠  T  :=
-by
+theorem finite (N : ℕ ): μ (⋃ i ∈ Set.Iic N , A f a B i) ≠  T := by
   have hk := subset f a B N
   have ht := (measure_mono hk).trans_lt hf2
   aesop
