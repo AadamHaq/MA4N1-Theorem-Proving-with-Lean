@@ -133,3 +133,27 @@ theorem set_difference_epsilon (N : ℕ ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ
   done
 
 --Now compact sets
+
+theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\b := by
+exact (Set.diff_union_diff_cancel h2 h1).symm
+
+
+theorem set_diff_finite_union (A K : ℕ → Set α)(h : ∀ i : ℕ, (K i) ⊆ (A i) ) : ⋃ i, (A i)\(K i) = (⋃ i, A i )\(⋃ i, K i) := by
+sorry
+
+/-
+theorem set_diff_union(a1 a2 b1 b2 : Set α)(h1: a1 ⊆ b1) (h2: a2 ⊆ b2) :
+b1\a1 ∪ b2\a2 = (b1 ∪ b2)\(a1 ∪ a2) := by
+apply?
+-/
+
+theorem finite_A (i : ℕ) : μ (A f a B i) ≠ T := by
+
+  sorry
+
+theorem compact_subset (i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ (A f a B i) < μ K + ε  := by
+  exact MeasurableSet.exists_isCompact_lt_add (measurable_A f a h B hm i) (finite_A μ f a B i) nzε
+  done
+
+
+---need to apply set difference to get one result here
