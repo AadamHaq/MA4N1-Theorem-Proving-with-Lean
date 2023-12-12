@@ -132,7 +132,34 @@ theorem set_difference_epsilon (N : ℕ ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ
   exact ⟨ k, h5 ⟩
   done
 
---Now compact sets
+--Here we obtain the compact subsets K_i of A_i for each i, after two technical results
+
+theorem finite_A (i : ℕ) : μ (A f a B i) ≠ ∞ := by
+  unfold A
+  have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
+  have hy := (measure_mono ss).trans_lt hf2
+  aesop
+  done
+
+--Eventually would be nice to put triv into compact_subset theorem
+theorem triv: ( 0 < ENNReal.ofReal ε ) := by
+  unfold ENNReal.ofReal
+  simp
+  exact hε
+  done
+
+theorem compact_subset (i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal ε  := by
+  unfold A
+  have hw := MeasurableSet.exists_isCompact_lt_add (measurable_A f a h B hm i) (finite_A μ f a B hf2 i) (zero_lt_iff.mp (triv ε hε))
+  let ⟨ K, HK ⟩ := hw
+  have ⟨ HK1, HK2, HK3 ⟩ := HK
+  have hq := measure_diff (HK.1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
+  have HK4 := tsub_le_iff_left.mpr (le_of_lt HK3)
+  rw[← hq] at HK4
+  exact ⟨ K, HK1, HK2, HK4 ⟩
+  done
+
+--These two results will be needed to manipulate the sets
 
 theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\b := by
 exact (Set.diff_union_diff_cancel h2 h1).symm
@@ -141,19 +168,11 @@ exact (Set.diff_union_diff_cancel h2 h1).symm
 theorem set_diff_finite_union (A K : ℕ → Set α)(h : ∀ i : ℕ, (K i) ⊆ (A i) ) : ⋃ i, (A i)\(K i) = (⋃ i, A i )\(⋃ i, K i) := by
 sorry
 
+---This theorem commented out might help in proving the above
 /-
 theorem set_diff_union(a1 a2 b1 b2 : Set α)(h1: a1 ⊆ b1) (h2: a2 ⊆ b2) :
 b1\a1 ∪ b2\a2 = (b1 ∪ b2)\(a1 ∪ a2) := by
 apply?
 -/
 
-theorem finite_A (i : ℕ) : μ (A f a B i) ≠ T := by
-
-  sorry
-
-theorem compact_subset (i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ (A f a B i) < μ K + ε  := by
-  exact MeasurableSet.exists_isCompact_lt_add (measurable_A f a h B hm i) (finite_A μ f a B i) nzε
-  done
-
-
----need to apply set difference to get one result here
+--Will need isCompact_iUnion, and sub-additivity of measure 
