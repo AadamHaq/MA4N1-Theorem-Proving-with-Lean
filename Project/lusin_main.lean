@@ -8,10 +8,14 @@ import Mathlib.Init.Order.Defs
 import Mathlib.Order.Filter.AtTopBot
 import Mathlib.Order.Filter.Basic
 
+
+
 set_option maxHeartbeats 0
 
-open MeasureTheory ENNReal Filter
+open MeasureTheory ENNReal Filter Finset BigOperators
 open scoped Topology
+
+
 
 -- Aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
 -- This is slightly more restrictive than the theorem in Cohn's book
@@ -94,12 +98,13 @@ theorem continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), 
   apply monotone_A
   done
 
-theorem difference_epsilon : ∃ k : ℕ, μ (B)  ≤
-μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * (1/2))  := by
+--Ideally we want to get rid of hs and have it proved a nicer way
+theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) : ∃ k : ℕ, μ (B)  ≤
+μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * 2⁻¹)  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
-    (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * (1/2)) (by
+    (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * 2⁻¹)) (by
       rw [gt_iff_lt, ENNReal.ofReal_pos]
-      exact mul_pos hε (one_half_pos))
+      exact mul_pos hε hs)
   have hl := (hN N le_rfl).1
   have hy := tsub_le_iff_right.mp hl
   exact ⟨N, hy⟩
@@ -120,9 +125,9 @@ theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   done
 
 --The final result
-theorem set_difference_epsilon : ∃ N : ℕ,
-μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε * (1/2)) := by
-  have ht := difference_epsilon μ f a B hf hcount ε hε
+theorem set_difference_epsilon (hs : (2⁻¹ : ℝ) > 0): ∃ N : ℕ,
+μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
+  have ht := difference_epsilon μ f a B hf hcount ε hε hs
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k)
     (ne_top_of_lt (LE.le.trans_lt (measure_mono (subset f a B k)) (Ne.lt_top hf)))
@@ -206,9 +211,11 @@ theorem set_diff_union_0(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h
 
 
 --This is the general version we need which should follow from set_diff_union_0 using induction
+
+
 theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
 ⋃ (_ : i ≤ n), (Set.diff (A i) (K i)) = Set.diff (⋃ (_ : i ≤ n), A i) (⋃ (_ : i ≤ n), K i) := by
-  induction' n with n ih
+  ---induction' n with n ih
   sorry
 
 
@@ -243,18 +250,28 @@ theorem lusin (hs : (2⁻¹ : ℝ) > 0): ∃ K : Set α, IsCompact K ∧ μ (B \
       sorry
 
 
-
-    have S2 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
+    have S1 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
       have SS := (Set.diff_union_diff_cancel h2 h1).symm
 
-      have SS1 := measure_union_le (Set.diff B ((⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (Set.diff (⋃ i, ⋃ (_ : i ≤ N), A f a B i) (⋃ i, ⋃ (_ : i ≤ N), K i))
+      ---have SS1 := measure_union_le (Set.diff B ((⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (Set.diff (⋃ i, ⋃ (_ : i ≤ N), A f a B i) (⋃ i, ⋃ (_ : i ≤ N), K i))
 
+      sorry
+    have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i : Icc 0 N), μ ((A f a B i) \ (K i)) := by
+      have SS2 := set_diff_union
+
+      sorry
+    have S3 : ∑ᶠ (i : Icc 0 N), μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
       sorry
 
 
 
+---(μ((A f a B i)\(K i)))
+
+
     sorry
   let ⟨ K, H1, H2 ⟩ := H
+
+
   have HC : Continuous (Set.restrict K f) := by
     sorry
 
@@ -264,3 +281,6 @@ theorem lusin (hs : (2⁻¹ : ℝ) > 0): ∃ K : Set α, IsCompact K ∧ μ (B \
 
 theorem triv100 (a b : Set α) : μ (a ∪ b) ≤ μ a + μ b := by
   exact measure_union_le a b
+
+
+ 
