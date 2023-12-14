@@ -121,8 +121,8 @@ theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   done
 
 --The final result
-theorem set_difference_epsilon (N : ℕ ) (hs : (2⁻¹ : ℝ) > 0): ∃ k : ℕ,
-μ (B \ ⋃ i, ⋃ (_ : i ≤ k), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
+theorem set_difference_epsilon (hs : (2⁻¹ : ℝ) > 0): ∃ N : ℕ,
+μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
   have ht := difference_epsilon μ f a B hf hcount ε hε hs
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k)
@@ -141,9 +141,14 @@ theorem finite_A (i : ℕ) : μ (A f a B i) ≠ ∞ := by
   exact LT.lt.ne hy
   done
 
-theorem compact_subset (i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal ε := by
+
+
+
+---We will take δ = ε/2N once N exists
+
+theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal δ    := by
   --unfold A
-  have hw := MeasurableSet.exists_isCompact_lt_add (measurable_A f a h B hm i) (finite_A μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hε))
+  have hw := MeasurableSet.exists_isCompact_lt_add (measurable_A f a h B hm i) (finite_A μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
   let ⟨ K, HK ⟩ := hw
   have ⟨ HK1, HK2, HK3 ⟩ := HK
   have hq := measure_diff (HK.1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
@@ -152,9 +157,8 @@ theorem compact_subset (i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCom
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
-
-
-
+theorem compact_subset_N (δ : ℝ)(hδ : 0 < δ  )(N: ℕ) :  ∃ K : ℕ → Set α, ∀ i ≤ N, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
+  sorry
 
 
 
@@ -168,6 +172,7 @@ theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\
 
 --triv needed for set_diff_union_0
 theorem triv(a b c : Set α) (h : c ⊆ b) (hc : a ∩ b = ∅ ) : (a ⊆ c.compl) := by
+
   sorry
 
 --This is the easier case of what we want to prove
@@ -202,13 +207,61 @@ theorem set_diff_union_0(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h
 
 
 --This is the general version we need which should follow from set_diff_union_0 using induction
-theorem set_diff_union (n : ℕ) (aa : ℕ → Set α)(kk : ℕ → Set α)(h1 : ∀ i,  kk i  ⊆ aa i) (h2 : ∀ i j, i ≠ j → aa i  ∩ aa j = ∅ ) :
-⋃ (_ : i ≤ n), (Set.diff (aa i) (kk i)) = Set.diff (⋃ (_ : i ≤ n), aa i) (⋃ (_ : i ≤ n), kk i) := by
+theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
+⋃ (_ : i ≤ n), (Set.diff (A i) (K i)) = Set.diff (⋃ (_ : i ≤ n), A i) (⋃ (_ : i ≤ n), K i) := by
   induction' n with n ih
   sorry
 
 
+--Will need isCompact_iUnion, and sub-additivity of measure
+
+
+theorem lusin (hs : (2⁻¹ : ℝ) > 0): ∃ K : Set α, IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
+  have H : ∃ K : Set α, IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε := by
+    have HE := set_difference_epsilon μ f a h B hm hf hcount ε hε hs
+    let ⟨ N, HSD ⟩ := HE
+    have p : 0 < (ε/(2*N)) := by
+      sorry
+    have HK := compact_subset_N μ f a B (ε/(2*N)) p N
+    rcases HK with ⟨K,P⟩
+
+    --- want to split P up into three statements
+
+    have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
+      --exact isCompact_iUnion
+      sorry
 
 
 
---Will need isCompact_iUnion, and sub-additivity of measure 
+    use (⋃ i, ⋃ (_ : i ≤ N), K i)
+    constructor
+    apply KMP
+
+    have h1 : (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
+      sorry
+
+    have h2 : (⋃ i, ⋃ (_ : i ≤ N), A f a B i) ⊆ B  := by
+      sorry
+
+
+
+    have S2 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
+      have SS := (Set.diff_union_diff_cancel h2 h1).symm
+
+      have SS1 := measure_union_le (Set.diff B ((⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (Set.diff (⋃ i, ⋃ (_ : i ≤ N), A f a B i) (⋃ i, ⋃ (_ : i ≤ N), K i))
+
+      sorry
+
+
+
+    sorry
+  let ⟨ K, H1, H2 ⟩ := H
+  have HC : Continuous (Set.restrict K f) := by
+    sorry
+
+  exact ⟨ K, H1, H2, HC ⟩
+  done
+
+
+theorem triv100 (a b : Set α) : μ (a ∪ b) ≤ μ a + μ b := by
+  exact measure_union_le a b
