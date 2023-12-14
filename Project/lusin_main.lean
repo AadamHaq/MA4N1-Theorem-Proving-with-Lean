@@ -94,13 +94,12 @@ theorem continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), 
   apply monotone_A
   done
 
---Ideally we want to get rid of hs and have it proved a nicer way
-theorem difference_epsilon (hs : (2⁻¹ : ℝ) > 0) : ∃ k : ℕ, μ (B)  ≤
-μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * 2⁻¹)  := by
+theorem difference_epsilon : ∃ k : ℕ, μ (B)  ≤
+μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * (1/2))  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
-    (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * 2⁻¹)) (by
+    (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * (1/2)) (by
       rw [gt_iff_lt, ENNReal.ofReal_pos]
-      exact mul_pos hε hs)
+      exact mul_pos hε (one_half_pos))
   have hl := (hN N le_rfl).1
   have hy := tsub_le_iff_right.mp hl
   exact ⟨N, hy⟩
@@ -121,9 +120,9 @@ theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   done
 
 --The final result
-theorem set_difference_epsilon (hs : (2⁻¹ : ℝ) > 0): ∃ N : ℕ,
-μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε * 2⁻¹) := by
-  have ht := difference_epsilon μ f a B hf hcount ε hε hs
+theorem set_difference_epsilon : ∃ N : ℕ,
+μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε * (1/2)) := by
+  have ht := difference_epsilon μ f a B hf hcount ε hε
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a h B hm k)
     (ne_top_of_lt (LE.le.trans_lt (measure_mono (subset f a B k)) (Ne.lt_top hf)))
