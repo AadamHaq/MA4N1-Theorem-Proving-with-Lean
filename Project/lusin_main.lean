@@ -152,22 +152,63 @@ theorem compact_subset (i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCom
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
---These two results will be needed to manipulate the sets
+
+
+
+
+
+
+
+--These results will be needed to manipulate the sets
 
 theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\b := by
   exact (Set.diff_union_diff_cancel h2 h1).symm
   done
 
-theorem set_diff_finite_union (A K : ℕ → Set α)(h : ∀ i : ℕ, (K i) ⊆ (A i) ) : ⋃ i, (A i)\(K i) = (⋃ i, A i )\(⋃ i, K i) := by
-  have hm := Set.iUnion_mono h
-  apply?
+
+--triv needed for set_diff_union_0
+theorem triv(a b c : Set α) (h : c ⊆ b) (hc : a ∩ b = ∅ ) : (a ⊆ c.compl) := by
   sorry
 
----This theorem commented out might help in proving the above
-/-
-theorem set_diff_union(a1 a2 b1 b2 : Set α)(h1: a1 ⊆ b1) (h2: a2 ⊆ b2) :
-b1\a1 ∪ b2\a2 = (b1 ∪ b2)\(a1 ∪ a2) := by
-apply?
--/
+--This is the easier case of what we want to prove
+theorem set_diff_union_0(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h3 : a1 ∩ a2 = ∅ ) :
+(Set.diff a1 k1) ∪ (Set.diff a2 k2) = Set.diff (a1 ∪ a2) (k1 ∪ k2) := by
+  unfold Set.diff
+  simp
+
+  have hh1 : {x | x ∈ a1 ∧ ¬(x ∈ k1 ∨ x ∈ k2)} = a1 ∩ k2.compl ∩ k1.compl := by
+    sorry
+    done
+
+  have hh2 : {x | x ∈ a2 ∧ ¬(x ∈ k1 ∨ x ∈ k2)} = a2 ∩ k1.compl ∩ k2.compl := by
+    sorry
+    done
+
+  rw[hh1, hh2]
+
+  have hh3 : {a | a ∈ a1 ∧ ¬a ∈ k1} ∪ {a | a ∈ a2 ∧ ¬a ∈ k2} = (a1 ∩ k1.compl) ∪ (a2 ∩ k2.compl) := by
+    aesop
+
+  rw[hh3]
+
+  have hh4 : a1 ∩ k2.compl = a1 := by
+    exact Set.inter_eq_left.mpr (triv a1 a2 k2 h2 h3)
+
+  have hh5 : a2 ∩ k1.compl = a2 := by
+    rw[Set.inter_comm] at h3
+    exact Set.inter_eq_left.mpr (triv a2 a1 k1 h1 h3)
+
+  rw[hh4, hh5]
+
+
+--This is the general version we need which should follow from set_diff_union_0 using induction
+theorem set_diff_union (n : ℕ) (aa : ℕ → Set α)(kk : ℕ → Set α)(h1 : ∀ i,  kk i  ⊆ aa i) (h2 : ∀ i j, i ≠ j → aa i  ∩ aa j = ∅ ) :
+⋃ (_ : i ≤ n), (Set.diff (aa i) (kk i)) = Set.diff (⋃ (_ : i ≤ n), aa i) (⋃ (_ : i ≤ n), kk i) := by
+  induction' n with n ih
+  sorry
+
+
+
+
 
 --Will need isCompact_iUnion, and sub-additivity of measure 
