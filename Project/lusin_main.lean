@@ -74,7 +74,6 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
   exact fun i i_1 _ => Set.subset_iUnion s i_1
   simp
   intro t
-  ---have hj := Set.subset_biUnion_of_mem (Nat.le_refl j)
   have hj := mwe_2 s t
   apply le_trans hj
   exact Set.subset_iUnion (fun x =>  ⋃ j, ⋃ (_ : j ≤ x), s j) t
@@ -115,7 +114,8 @@ theorem partial_union_A_measurable (N : ℕ): MeasurableSet (⋃ i, ⋃ (_ : i �
 
 theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   unfold A
-  aesop
+  rename_i inst inst_1 inst_2 inst_3 inst_4 inst_5 inst_6
+  simp_all only [ne_eq, Set.iUnion_subset_iff, Set.inter_subset_right, implies_true, forall_const]
   done
 
 --The final result
@@ -140,10 +140,8 @@ theorem finite_A (i : ℕ) : μ (A f a B i) ≠ ∞ := by
 
 ---We will take δ = ε/2N once N exists
 theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal δ    := by
-  have hw := MeasurableSet.exists_isCompact_lt_add (measurable_A f a hmf B hmb i) (finite_A μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
-  let ⟨ K, HK ⟩ := hw
-  have ⟨ HK1, HK2, HK3 ⟩ := HK
-  have hq := measure_diff (HK.1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
+  have ⟨ K, HK1, HK2, HK3 ⟩ := MeasurableSet.exists_isCompact_lt_add (measurable_A f a hmf B hmb i) (finite_A μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
+  have hq := measure_diff (HK1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
   have HK4 := tsub_le_iff_left.mpr (le_of_lt HK3)
   rw[← hq] at HK4
   exact ⟨ K, HK1, HK2, HK4 ⟩
@@ -209,27 +207,26 @@ theorem lusin (Notzero : N > 0): ∃ K : Set α, IsCompact K ∧ μ (B \ K ) ≤
       apply Notzero
       apply zero_lt_two
     have HK := compact_subset_N μ f a B (ε/(2*N)) p N
-    rcases HK with ⟨K,P⟩
-    have HE := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
-    let ⟨ N, HSD ⟩ := HE
-    --- want to split P up into three statements
+    rcases HK with ⟨K, P⟩
+    --specialize P 1
+
+
+    have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
 
     have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
-      --exact isCompact_iUnion
+      have kmp : ∀ i ≤ N, IsCompact (K i) := by sorry
+      --exact isCompact_iUnion kmp
       sorry
-
-
 
     use (⋃ i, ⋃ (_ : i ≤ N), K i)
     constructor
-    apply KMP
+    apply
 
     have h1 : (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
-      sorry
-
+      have hh :  ∀ i ≤ N, K i ⊆ (A f a B i) := by sorry
+      apply Set.iUnion₂_mono hh
     have h2 : (⋃ i, ⋃ (_ : i ≤ N), A f a B i) ⊆ B  := by
-      sorry
-
+      apply (subset f a B N)
 
     have S1 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
       have SS := (Set.diff_union_diff_cancel h2 h1).symm
@@ -246,10 +243,10 @@ theorem lusin (Notzero : N > 0): ∃ K : Set α, IsCompact K ∧ μ (B \ K ) ≤
 
 
 
----(μ((A f a B i)\(K i)))
+  ---(μ((A f a B i)\(K i)))
 
 
-    sorry
+  sorry
   let ⟨ K, H1, H2 ⟩ := H
 
 
