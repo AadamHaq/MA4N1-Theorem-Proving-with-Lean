@@ -24,6 +24,23 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
+def mwe_4 (i : ℕ) : ∃ x : ℝ, i < x := by
+  sorry
+
+def mwe_5 : ∃ (x : ℕ → ℝ), ∀ i, i < x i := by
+  choose x hx using mwe_4
+  exact ⟨x, hx⟩
+
+
+
+
+
+
+
+
+
+
+
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
@@ -147,8 +164,10 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K �
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
-theorem compact_subset_N (δ : ℝ)(hδ : 0 < δ  )(N: ℕ) :  ∃ K : ℕ → Set α, ∀ i ≤ N, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
-  sorry
+
+theorem compact_subset_N (δ : ℝ)(hδ : 0 < δ ): ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
+  choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
+  exact ⟨K, hK⟩
 
 --These results will be needed to manipulate the sets
 
@@ -159,6 +178,15 @@ theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\
 --triv needed for set_diff_union_0
 theorem triv(a b c : Set α) (h : c ⊆ b) (hc : a ∩ b = ∅ ) : (a ⊆ c.compl) := by
   sorry
+
+
+--This will be needed in the induction proof
+theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅ ) : a\b = a\c := by
+  have hr : a\b = a\c ∪ (a ∩ (c\b)) := by
+    sorry
+  rw[hr,hz]
+  aesop
+
 
 --This is the easier case of what we want to prove
 theorem set_diff_union_0(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h3 : a1 ∩ a2 = ∅ ) :
@@ -193,10 +221,33 @@ theorem set_diff_union_0(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h
 
 --This is the general version we need which should follow from set_diff_union_0 using induction
 
-theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i ≤ n,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
-⋃ (_ : i ≤ n), (Set.diff (A i) (K i)) = Set.diff (⋃ (_ : i ≤ n), A i) (⋃ (_ : i ≤ n), K i) := by
-  ---induction' n with n ih
-  sorry
+theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
+⋃ i, ⋃ (_ : i ≤ n), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n), K i) := by
+  induction' n with n ih
+  --base case
+  simp
+
+  have s1 : ⋃ i, ⋃ (_ : i ≤ Nat.succ n), (A i)\(K i) = (⋃ i, ⋃ (_ : i ≤ n), (A i)\(K i)) ∪ (A (n+1))\(K (n+1)) := by
+    rw [← @Set.biUnion_le_succ]
+
+  have s2 : (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n), K i) = (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n+1), K i) := by
+    have ss : ⋃ i, ⋃ (_ : i ≤ n), K i ⊆ ⋃ i, ⋃ (_ : i ≤ n+1), K i := by
+      sorry
+
+  have s3 : (A (n+1))\(K (n+1)) = (A (n+1))\((⋃ i, ⋃ (_ : i ≤ n+1), K i)) := by sorry
+
+  have s4 : (⋃ (i : ℕ) (_ : i ≤ n), A i)\(⋃ (i : ℕ) (_ : i ≤ n + 1), K i) ∪
+    (A (n + 1))\(⋃ (i : ℕ) (_ : i ≤ n + 1), K i) = (⋃ i, ⋃ (_ : i ≤ n+1), A i)\(⋃ i, ⋃ (_ : i ≤ n+1), K i) := by
+    have s5 :  ((⋃ (i : ℕ) (_ : i ≤ n), A i) ∪ A (n + 1)) = (⋃ (i : ℕ) (_ : i ≤ n+1), A i) := by
+      rw [← @Set.biUnion_le_succ]
+
+    rw[Set.union_diff_distrib.symm]
+    rw[s5]
+
+  rw[s1,ih,s2,s3,s4]
+
+
+
 
 --Will need isCompact_iUnion, and sub-additivity of measure
 theorem lusin (Notzero : N > 0): ∃ K : Set α, IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
