@@ -159,8 +159,11 @@ theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\
   done
 
 --triv needed for set_diff_union_0
-theorem triv(a b c : Set α) (h : c ⊆ b) (hc : a ∩ b = ∅ ) : (a ⊆ c.compl) := by
-  sorry
+theorem triv (a b c: Set α )(h : c ⊆ b)(hc : a ∩ b = ∅ ) : a ⊆ cᶜ := by
+  have dj : (a ∩ b = ∅) ↔ Disjoint a b := by 
+    exact Iff.symm Set.disjoint_iff_inter_eq_empty 
+  rw[dj] at hc  
+  apply Set.Subset.trans (Disjoint.subset_compl_left (Disjoint.symm hc)) (Set.compl_subset_compl.mpr h) 
 
 
 --This will be needed in the induction proof
