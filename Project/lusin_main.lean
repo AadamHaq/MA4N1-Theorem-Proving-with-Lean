@@ -24,23 +24,6 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
-def mwe_4 (i : ℕ) : ∃ x : ℝ, i < x := by
-  sorry
-
-def mwe_5 : ∃ (x : ℕ → ℝ), ∀ i, i < x i := by
-  choose x hx using mwe_4
-  exact ⟨x, hx⟩
-
-
-
-
-
-
-
-
-
-
-
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
