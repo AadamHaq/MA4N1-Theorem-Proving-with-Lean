@@ -26,7 +26,8 @@ variable (ε : ℝ)(hε: 0 < ε)
 
 
 theorem triv1 : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
-  sorry
+  rw[ENNReal.ofReal_div_of_pos two_pos] 
+  simp only [ofReal_ofNat, ENNReal.add_halves]
 
 theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ᶠ (i ≤ N), m i ≤ N*b := by
   sorry
