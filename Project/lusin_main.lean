@@ -24,6 +24,23 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
+
+theorem triv1 : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
+  sorry
+
+theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ᶠ (i ≤ N), m i ≤ N*b := by
+  sorry
+
+theorem triv3 (N: ℕ) : ↑N * ENNReal.ofReal (ε/(2*↑N)) = ENNReal.ofReal (ε/2) := by
+  sorry
+
+theorem triv4 (N : ℕ)(s : ℕ → Set α) : μ (⋃ i, ⋃ (_ : i ≤ N), s i ) ≤ ∑ᶠ (i ≤ N), μ (s i) := by
+  sorry
+
+theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc 0 N) → IsCompact (K i)) : IsCompact (⋃  i ∈ (Icc 0 N) , K i) := by
+  exact isCompact_biUnion (Icc 0 N) h
+
+
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
@@ -52,10 +69,6 @@ theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
 
 theorem disjoint_A: ∀ (i j : ℕ), i ≠ j → A f a B i ∩ A f a B j = ∅ := by
   sorry
-
-theorem countable_subadd (A : ℕ → Set α ) : μ (⋃ i, ⋃ (_ : i ≤ N) , A i) ≤ ∑ᶠ (i ≤ N), μ (A i) := by
-  sorry
-
 
 --Next we show partial unions are monotone
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
@@ -155,13 +168,10 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K �
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
---Could try to combine later
-theorem compact_subset_finite_N (δ : ℝ)(hδ : 0 < δ )(i : ℕ): ∃ (K : Finset.range (n+1) → Set α), ∀ i,  K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by 
-  have compact_subset_N :  ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
-    choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
-    exact ⟨K, hK⟩ 
-  have ⟨x, hx⟩ := compact_subset_N
-  exact ⟨λ i => x i, λ i => hx i⟩
+
+theorem compact_subset_N (δ : ℝ)(hδ : 0 < δ ): ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
+  choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
+  exact ⟨K, hK⟩
 
 --These results will be needed to manipulate the sets
 
@@ -297,20 +307,10 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
   done
 
 
-
-
-
-
-theorem mwe_4 (N : ℕ)(P Q Z: ℕ → Prop)(h : ∀ i, P i ∧ Q i ∧ Z i ) : ∀ i ≤ N, Q i := by
-  choose h1 h2 h3 using h
-
-
---Will need isCompact_iUnion, and sub-additivity of measure
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
   have not0 : N > 0 := by
     sorry
-
 
   have p : 0 < (ε / (2 * N )) := by
     apply(div_pos hε)
@@ -320,24 +320,17 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*N)) p
   choose HK1 HK2 HK3 using HK
-
+  have HK3' : ∀ i ≤ N, μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * N)) := by
+    aesop
 
   have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
-
-    have S1 : (⋃ (i : ℕ) (_ : i ≤ N), K i) = ⋃ i ∈ (Set.Icc 0 N), K i := by aesop
-    have KMP3 : ∀ i ∈ Set.Icc 0 N, IsCompact (K i) := by
+    have S1 : (⋃ (i : ℕ) (_ : i ≤ N), K i) = ⋃ i ∈ (Icc 0 N), K i := by aesop
+    have KMP1 : ∀ i ∈ Icc 0 N, IsCompact (K i) := by
       aesop
-    have FN : Finite (Set.Icc 0 N) := by
-      exact Finite.of_fintype ↑(Set.Icc 0 N)
-    sorry
-
-
-
-
-
+    have KMP2 :=  compact_union N K KMP1
+    aesop
 
   have SS : (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ B := by
-
     have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by
       aesop
 
@@ -351,9 +344,7 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
     exact Set.iUnion₂_subset hh3
 
-
   --This part relates to showing APP
-
   have S1 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
     have h2: (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ ⋃ i, ⋃ (_ : i ≤ N), A f a B i := by
       simp
@@ -367,21 +358,18 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     rw[← SS1] at SS2
     exact SS2
 
-
   have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) := by
     --apply huge set_diff theorem here
     have SS2 := set_diff_union N (A f a B) K HK1 (disjoint_A f a B)
     rw[← SS2]
-
     -- should just be countable subadditivity now
-    sorry
+    exact triv4 μ N (fun i ↦ (A f a B i \ K i))
 
   have S3 : ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
-  -- should just follow from HK3 but can't get to work
-    sorry
-
-
-
+    have SS3 := triv2 N (ENNReal.ofReal (ε/(2*N))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3'
+    simp at SS3
+    rw[triv3] at SS3
+    exact SS3
 
   ---Then will just use S3 and HSD to show APP
   have APP : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i))  ≤  ENNReal.ofReal ε := by
@@ -392,19 +380,13 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
       have H := le_trans (add_le_add_left S3 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (add_le_add_right HSD (ENNReal.ofReal (ε / 2)))
       rw[@add_comm] at H
       have HH := le_trans (add_le_add_right S2 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i)) ) H
-      have H2 : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
-        sorry
-      rw[H2, @add_comm] at HH
+      rw[triv1, @add_comm] at HH
       exact HH
 
     exact le_trans S1 P2
-
 
   have CTS : Continuous (Set.restrict (⋃ i, ⋃ (_ : i ≤ N), K i) f) := by
     sorry
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
-
-
-  
