@@ -63,12 +63,20 @@ theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
   apply MeasurableSet.iUnion (measurable_A f a hmf B hmb)
   done
 
-theorem disjoint_A: ∀ (i j : ℕ), i ≠ j → A f a B i ∩ A f a B j = ∅ := by
-  unfold A 
-  intro i j 
-  have hj : i ≠ j → f ⁻¹' {a i} ∩ f ⁻¹' {a j} = ∅ := by 
-    sorry  
-  sorry
+theorem disjoint_A (i j : ℕ) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ := by
+  unfold A
+  have hj : Disjoint (f ⁻¹' {a i}) (f ⁻¹' {a j}) := by
+    have hj2 : Disjoint {a i} {a j} := by
+      have neq : a i ≠ a j := by
+        exact Function.Injective.ne hinj h
+      rw[← Set.disjoint_singleton] at neq
+      exact neq
+    exact Disjoint.preimage f hj2
+  rw [@Set.inter_inter_inter_comm]
+  simp
+  have ss := Set.inter_subset_left (f ⁻¹' {a i} ∩ f ⁻¹' {a j}) B
+  rw [@Set.disjoint_iff_inter_eq_empty] at hj
+  exact Set.subset_eq_empty ss hj
 
 --Next we show partial unions are monotone
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
@@ -301,12 +309,6 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
       rw [← @Set.biUnion_le_succ]
 
     rw[Set.union_diff_distrib.symm]
-    rw[s5]
-
-  rw[s1,ih,s2,s3,s4]
-  done
-
-
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
   have not0 : N > 0 := by
@@ -360,7 +362,7 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) := by
     --apply huge set_diff theorem here
-    have SS2 := set_diff_union N (A f a B) K HK1 (disjoint_A f a B)
+    have SS2 := set_diff_union N (A f a B) K HK1 (fun i j a_1 => disjoint_A f a B i j a_1)
     rw[← SS2]
     -- should just be countable subadditivity now
     exact triv4 μ N (fun i ↦ (A f a B i \ K i))
@@ -390,3 +392,10 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
+    rw[s5]
+
+  rw[s1,ih,s2,s3,s4]
+  done
+
+
+
