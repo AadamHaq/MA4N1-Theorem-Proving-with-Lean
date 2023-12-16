@@ -24,8 +24,25 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
-theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ i in Icc 0 N, m i ≤ N*b := by
+--I made triv22 as an easier version of triv2 to prove
+theorem triv22(N : ℕ)(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ ∑ i in Icc 0 N, b := by
   sorry
+
+theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1)*b := by
+  have h1 : ∑ i in Icc 0 N, m i ≤ ∑ i in Icc 0 N, b := by
+    sorry
+  have h2 : ∑ i in Icc 0 N, b = (N+1)*b := by
+    aesop
+  exact Eq.trans_ge h2 h1
+
+
+
+--triv3 no longer works as had to change to N+1 in Lusin
+
+theorem triv3 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
+    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div, ofReal_coe_nat, ENNReal.div_self, one_mul]
+    sorry
+
 
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
@@ -312,26 +329,20 @@ theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
 
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
-  have not0 : N ≠ 0  := by
+  have not0 : ¬N = 0  := by
     sorry
 
-  have N1 : ↑N * ENNReal.ofReal (ε/(2*↑N)) = ENNReal.ofReal (ε/2) := by
-    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div, ofReal_coe_nat, ENNReal.div_self, one_mul]
-    simp
-    exact not0
-    aesop
-    simp
-    exact Nat.pos_of_ne_zero not0
 
-  have p : 0 < (ε / (2 * N )) := by
+  have p : 0 < (ε / (2 * (N+1) )) := by
     apply(div_pos hε)
     rw[zero_lt_mul_left, Nat.cast_pos]
     exact Nat.pos_of_ne_zero not0
     apply zero_lt_two
+    sorry
 
-  have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*N)) p
+  have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*(N+1))) p
   choose HK1 HK2 HK3 using HK
-  have HK3' : ∀ i ≤ N, μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * N)) := by
+  have HK3' : ∀ i ≤ N, μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * (N+1))) := by
     aesop
 
   have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
@@ -379,9 +390,9 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     aesop
 
   have S3 : ∑ i in Icc 0 N, μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
-    have SS3 := triv2 N (ENNReal.ofReal (ε/(2*N))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3'
+    have SS3 := triv2 N (ENNReal.ofReal (ε/(2*(N+1)))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3
     simp at SS3
-    rw[N1] at SS3
+    rw[triv3 ε N] at SS3
     exact SS3
 
   ---Then will just use S3 and HSD to show APP
@@ -407,4 +418,3 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
-
