@@ -36,8 +36,8 @@ theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b
   exact Eq.trans_ge h2 h1
 
 
-
 --triv3 no longer works as had to change to N+1 in Lusin
+--don't change the statement if possible as it will mess up Lusin 
 
 theorem triv3 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
     rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div, ofReal_coe_nat, ENNReal.div_self, one_mul]
@@ -329,16 +329,13 @@ theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
 
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
-  have not0 : ¬N = 0  := by
-    sorry
-
 
   have p : 0 < (ε / (2 * (N+1) )) := by
     apply(div_pos hε)
-    rw[zero_lt_mul_left, Nat.cast_pos]
-    exact Nat.pos_of_ne_zero not0
+    rw[zero_lt_mul_left]
+    exact Nat.cast_add_one_pos N
     apply zero_lt_two
-    sorry
+    done
 
   have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*(N+1))) p
   choose HK1 HK2 HK3 using HK
