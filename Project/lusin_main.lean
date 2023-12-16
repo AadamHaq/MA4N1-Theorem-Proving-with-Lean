@@ -36,12 +36,17 @@ theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b
   exact Eq.trans_ge h2 h1
 
 
---triv3 no longer works as had to change to N+1 in Lusin
---don't change the statement if possible as it will mess up Lusin 
 
 theorem triv3 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
-    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div, ofReal_coe_nat, ENNReal.div_self, one_mul]
-    sorry
+    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
+    have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
+      have h2 := ENNReal.ofReal_coe_nat (N+1)
+      aesop
+    rw[h, ENNReal.div_self, one_mul]
+    simp
+    aesop
+    exact Nat.cast_add_one_pos N
+    done
 
 
 -- We define the sequence of sets A_i as follows
