@@ -68,7 +68,11 @@ theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
   done
 
 theorem disjoint_A: ∀ (i j : ℕ), i ≠ j → A f a B i ∩ A f a B j = ∅ := by
-  sorry
+  unfold A 
+  intro i j 
+  have hj : i ≠ j → f ⁻¹' {a i} ∩ f ⁻¹' {a j} = ∅ := by 
+    sorry  
+  rw?
 
 --Next we show partial unions are monotone
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
