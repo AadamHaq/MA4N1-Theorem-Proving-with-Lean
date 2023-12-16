@@ -24,10 +24,6 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
-theorem triv1 : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
-  rw[ENNReal.ofReal_div_of_pos two_pos]
-  simp only [ofReal_ofNat, ENNReal.add_halves]
-
 
 theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ᶠ (i ≤ N), m i ≤ N*b := by
   sorry
@@ -35,8 +31,11 @@ theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)
 theorem triv3 (N: ℕ) : ↑N * ENNReal.ofReal (ε/(2*↑N)) = ENNReal.ofReal (ε/2) := by
   sorry
 
-theorem triv4 (N : ℕ)(s : ℕ → Set α) : μ (⋃ i, ⋃ (_ : i ≤ N), s i ) ≤ ∑ᶠ (i ≤ N), μ (s i) := by
-  sorry
+
+theorem triv4 (N : ℕ)(s : ℕ → Set α) : μ (⋃ (b : ℕ) (_ : b ∈ Icc 0 N), s b) ≤ ∑ p in Icc 0 N, μ (s p) := by
+  exact measure_biUnion_finset_le (Icc 0 N) s
+  done
+
 
 theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc 0 N) → IsCompact (K i)) : IsCompact (⋃  i ∈ (Icc 0 N) , K i) := by
   exact isCompact_biUnion (Icc 0 N) h
@@ -372,12 +371,13 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     rw[← SS1] at SS2
     exact SS2
 
-  have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) := by
+  have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ (i ∈ Icc 0 N), K i)) ≤ ∑ i in Icc 0 N, μ ((A f a B i) \ (K i)) := by
     --apply huge set_diff theorem here
     have SS2 := set_diff_union N (A f a B) K HK1 (fun i j a_1 => disjoint_A f a hinj B i j a_1)
+    simp
     rw[← SS2]
-    -- should just be countable subadditivity now
-    exact triv4 μ N (fun i ↦ (A f a B i \ K i))
+    have h := triv4 μ N (fun i ↦ (A f a B i \ K i))
+    aesop
 
   have S3 : ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
     have SS3 := triv2 N (ENNReal.ofReal (ε/(2*N))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3'
@@ -394,7 +394,10 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
       have H := le_trans (add_le_add_left S3 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (add_le_add_right HSD (ENNReal.ofReal (ε / 2)))
       rw[@add_comm] at H
       have HH := le_trans (add_le_add_right S2 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i)) ) H
-      rw[triv1, @add_comm] at HH
+      have rε : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
+        rw[ENNReal.ofReal_div_of_pos two_pos]
+        simp only [ofReal_ofNat, ENNReal.add_halves]
+      rw[rε , @add_comm] at HH
       exact HH
 
     exact le_trans S1 P2
