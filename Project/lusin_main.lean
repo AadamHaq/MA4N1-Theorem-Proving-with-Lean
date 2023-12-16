@@ -38,23 +38,15 @@ theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
 --Here we show some sets are measurable for later use
 theorem measurable_A : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
   intro b
-  apply MeasurableSet.inter
-  apply MeasurableSet.preimage
-  apply MeasurableSet.singleton (a b)
-  apply hmf
-  exact hmb
-  done
-
---We can just use 'MeasurableSet.iUnion (measurable_A f a h B hm)' later and then delete this
-theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
-  apply MeasurableSet.iUnion (measurable_A f a hmf B hmb)
+  apply MeasurableSet.inter _ hmb
+  apply MeasurableSet.preimage (MeasurableSet.singleton (a b)) hmf
   done
 
 --Next we show partial unions are monotone
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
   intro x y
-  simp
+  simp only [Set.le_eq_subset, Set.iUnion_subset_iff]
   intro hxy j hjx
   have hjy := hjx.trans hxy
   apply Set.subset_biUnion_of_mem
@@ -70,9 +62,9 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
  ⋃ i, (⋃ j, ⋃ (_ : j ≤ i) , s j ) := by
   rw[superset_antisymm_iff]
   constructor
-  simp
+  simp only [Set.iUnion_subset_iff]
   exact fun i i_1 _ => Set.subset_iUnion s i_1
-  simp
+  simp only [Set.iUnion_subset_iff]
   intro t
   have hj := mwe_2 s t
   apply le_trans hj
@@ -82,7 +74,7 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
 theorem union_partial_A_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := by
   rw[(union_partial_eq_union (A f a B)).symm]
   unfold A
-  apply B_eq_union_Ai
+  apply B_eq_union_Ai 
   exact hcount
   done
 
@@ -114,7 +106,6 @@ theorem partial_union_A_measurable (N : ℕ): MeasurableSet (⋃ i, ⋃ (_ : i �
 
 theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   unfold A
-  rename_i inst inst_1 inst_2 inst_3 inst_4 inst_5 inst_6
   simp_all only [ne_eq, Set.iUnion_subset_iff, Set.inter_subset_right, implies_true, forall_const]
   done
 
@@ -137,7 +128,6 @@ theorem finite_A (i : ℕ) : μ (A f a B i) ≠ ∞ := by
   exact LT.lt.ne hy
   done
 
-
 ---We will take δ = ε/2N once N exists
 theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal δ    := by
   have ⟨ K, HK1, HK2, HK3 ⟩ := MeasurableSet.exists_isCompact_lt_add (measurable_A f a hmf B hmb i) (finite_A μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
@@ -147,10 +137,10 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K �
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
-
 theorem compact_subset_N (δ : ℝ)(hδ : 0 < δ ): ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
   choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
   exact ⟨K, hK⟩
+  done
 
 --These results will be needed to manipulate the sets
 
@@ -162,55 +152,61 @@ theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\
 theorem triv (a b c: Set α )(h : c ⊆ b)(hc : a ∩ b = ∅ ) : a ⊆ cᶜ := by
   have dj : (a ∩ b = ∅) ↔ Disjoint a b := by
     exact Iff.symm Set.disjoint_iff_inter_eq_empty
-  rw[dj] at hc
+  rw[dj] at hc 
   apply Set.Subset.trans (Disjoint.subset_compl_left (Disjoint.symm hc)) (Set.compl_subset_compl.mpr h)
-
---This will be needed in the induction proof
-theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅) : a\b = a\c := by
-  have hr : a\b = a\c ∪ (a ∩ (c\b)) := by
-    sorry
-
-  rw[hr,hz]
-  aesop
-
+  done
 
 --This is the easier case of what we want to prove
-theorem set_diff_union_0(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h3 : a2 ∩ a1 = ∅):(a1 ∪ a2) \  (k1 ∪ k2) = (a1\k1) ∪ (a2 \ k2)   := by
+theorem set_diff_union_0 (a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h3 : a2 ∩ a1 = ∅):(a1 ∪ a2)\(k1 ∪ k2) 
+= (a1\k1) ∪ (a2 \ k2) := by
   have t1 := triv a2 a1 k1 h1 h3
   rw[Set.inter_comm] at h3
   have t2 := triv a1 a2 k2 h2 h3
-  rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2, ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
+  rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2,
+   ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, 
+   Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
+  done
 
+--This will be needed in the induction proof
+theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅) : a\b = a\c := by
+  have cb : cᶜ ⊆ bᶜ := by exact Set.compl_subset_compl.mpr h
+  have hr :  a \ c ∪ (a ∩ (c\b)) = a \ b := by
+    rw[Set.diff_eq_compl_inter, Set.diff_eq_compl_inter, Set.union_distrib_left, Set.union_distrib_right, 
+    Set.union_self, Set.union_inter_cancel_right, Set.union_distrib_left, Set.union_distrib_right, 
+    Set.union_distrib_right, Set.compl_union_self, Set.univ_inter, Set.union_eq_self_of_subset_left cb,
+     Set.inter_comm bᶜ (a ∪ bᶜ), Set.union_inter_cancel_right, Set.inter_comm bᶜ (a ∪ c), ← Set.inter_assoc, 
+     Set.inter_comm a (a ∪ c), ←Set.diff_eq, Set.union_inter_cancel_left ]
+  rw[← hr,hz] 
+  exact Set.union_empty (a \ c) 
+  done
 
 --This is the general version we need which should follow from set_diff_union_0 using induction
 
-theorem A_intersect_empty (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : (A (n + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ n), A i) = ∅ := by
+theorem A_intersect_empty (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : 
+(A (n + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ n), A i) = ∅ := by
   have hj : ∀ i ≤ n, A (n+1) ∩ A i = ∅  := by
     intro i
-    have neq (j : ℕ)(h : i ≤ n) :  i ≠ n+1  := by
+    have neq (h : i ≤ n) :  i ≠ n+1  := by
       aesop
-
     have dsj2 (h: i ≠ n+1): Disjoint (A (n + 1)) (A i) := by
       exact Set.disjoint_iff_inter_eq_empty.mpr (h2 (n + 1) i (id (Ne.symm h)))
     exact fun a => Disjoint.inter_eq (dsj2 (neq n a))
     done
-
-  rw [@Set.inter_iUnion₂]
-  simp
+  simp_rw [@Set.inter_iUnion₂]
+  simp only [Set.iUnion_eq_empty]
   exact hj
-
-
+  done 
 
 theorem disjoint_K (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : ∀ i ≤ n,  Disjoint (K i) (K (n+1)) := by
   intro i
-  have neq (j : ℕ)(h : i ≤ n) :  i ≠ n+1  := by
+  have neq (j : ℕ)(h : i ≤ n) :  i ≠ n+1  := by 
     aesop
 
   have dsj2 (h: i ≠ n+1): Disjoint (A i) (A (n + 1))  := by
     exact Set.disjoint_iff_inter_eq_empty.mpr (h2 i (n + 1) h)
 
   exact fun a => Set.disjoint_of_subset (h1 i) (h1 (n + 1)) (dsj2 (neq n a))
-
+  done
 
 theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
 ⋃ i, ⋃ (_ : i ≤ n), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n), K i) := by
@@ -287,24 +283,15 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
   rw[s1,ih,s2,s3,s4]
   done
 
-
-
-
-
-
-
-
 theorem mwe_4 (N : ℕ)(P Q Z: ℕ → Prop)(h : ∀ i, P i ∧ Q i ∧ Z i ) : ∀ i ≤ N, Q i := by
   aesop
-
 
 --Will need isCompact_iUnion, and sub-additivity of measure
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
   have not0 : N > 0 := by
     sorry
-
-
+  -- not sure how there is a proof for this?
   have p : 0 < (ε / (2 * N )) := by
     apply(div_pos hε)
     rw[zero_lt_mul_left, Nat.cast_pos]
@@ -313,7 +300,6 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*N)) p
 
-
   -- need to work out how to split HK
 
   have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
@@ -321,11 +307,9 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     have JJ := mwe_4 N (fun i ↦ (K i ⊆ A f a B i)) (fun i ↦ IsCompact (K i)) (fun i ↦ (μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * ↑N)))) HK
     simp at JJ
 
-
-
   have SS : (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ B := by
 
-    have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by
+    have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by 
       --extract this from P
       sorry
 
@@ -368,3 +352,9 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
+
+theorem idk (a b c : Set α ) (hc :c ⊆ b)(hb : b ⊆ a) : μ (a \ c) ≤ μ (a \ b ) + μ (b \ c ) := by
+  sorry
+
+theorem idk2 (a b c : Set α )(hc :c ⊆ b)(hb : b ⊆ a) : a \ c =  a \ b ∪ b \ c := by 
+  sorry
