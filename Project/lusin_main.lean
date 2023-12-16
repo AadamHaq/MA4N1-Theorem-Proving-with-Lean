@@ -155,10 +155,13 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K �
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
-
-theorem compact_subset_N (δ : ℝ)(hδ : 0 < δ ): ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
-  choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
-  exact ⟨K, hK⟩
+--Could try to combine later
+theorem compact_subset_finite_N (δ : ℝ)(hδ : 0 < δ )(i : ℕ): ∃ (K : Finset.range (n+1) → Set α), ∀ i,  K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by 
+  have compact_subset_N :  ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
+    choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
+    exact ⟨K, hK⟩ 
+  have ⟨x, hx⟩ := compact_subset_N
+  exact ⟨λ i => x i, λ i => hx i⟩
 
 --These results will be needed to manipulate the sets
 
