@@ -55,12 +55,8 @@ theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
 --Here we show some sets are measurable for later use
 theorem measurable_A : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
   intro b
-  apply MeasurableSet.inter
-  apply MeasurableSet.preimage
-  apply MeasurableSet.singleton (a b)
-  apply hmf
-  exact hmb
-  done
+  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (a b))) (hmf)) hmb
+  done 
 
 --We can just use 'MeasurableSet.iUnion (measurable_A f a h B hm)' later and then delete this
 theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
