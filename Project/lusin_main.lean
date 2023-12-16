@@ -24,22 +24,8 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
-
-theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ᶠ (i ≤ N), m i ≤ N*b := by
+theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ i in Icc 0 N, m i ≤ N*b := by
   sorry
-
-theorem triv3 (N: ℕ) : ↑N * ENNReal.ofReal (ε/(2*↑N)) = ENNReal.ofReal (ε/2) := by
-  sorry
-
-
-theorem triv4 (N : ℕ)(s : ℕ → Set α) : μ (⋃ (b : ℕ) (_ : b ∈ Icc 0 N), s b) ≤ ∑ p in Icc 0 N, μ (s p) := by
-  exact measure_biUnion_finset_le (Icc 0 N) s
-  done
-
-
-theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc 0 N) → IsCompact (K i)) : IsCompact (⋃  i ∈ (Icc 0 N) , K i) := by
-  exact isCompact_biUnion (Icc 0 N) h
-
 
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
@@ -319,16 +305,28 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
   rw[s1,ih,s2,s3,s4]
   done
 
+--Will need this result in the final theorem
+theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc 0 N) → IsCompact (K i)) : IsCompact (⋃  i ∈ (Icc 0 N) , K i) := by
+  exact isCompact_biUnion (Icc 0 N) h
 
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
+
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
-  have not0 : N > 0 := by
+  have not0 : N ≠ 0  := by
     sorry
+
+  have N1 : ↑N * ENNReal.ofReal (ε/(2*↑N)) = ENNReal.ofReal (ε/2) := by
+    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div, ofReal_coe_nat, ENNReal.div_self, one_mul]
+    simp
+    exact not0
+    aesop
+    simp
+    exact Nat.pos_of_ne_zero not0
 
   have p : 0 < (ε / (2 * N )) := by
     apply(div_pos hε)
     rw[zero_lt_mul_left, Nat.cast_pos]
-    apply not0
+    exact Nat.pos_of_ne_zero not0
     apply zero_lt_two
 
   have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*N)) p
@@ -376,13 +374,14 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     have SS2 := set_diff_union N (A f a B) K HK1 (fun i j a_1 => disjoint_A f a hinj B i j a_1)
     simp
     rw[← SS2]
-    have h := triv4 μ N (fun i ↦ (A f a B i \ K i))
+    have h2 : μ (⋃ (i : ℕ) (_ : i ∈ Icc 0 N), (A f a B i \ K i)) ≤ ∑ i in Icc 0 N, μ (A f a B i \ K i) := by
+      exact measure_biUnion_finset_le (Icc 0 N) (fun i ↦(A f a B i \ K i) )
     aesop
 
-  have S3 : ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
+  have S3 : ∑ i in Icc 0 N, μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
     have SS3 := triv2 N (ENNReal.ofReal (ε/(2*N))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3'
     simp at SS3
-    rw[triv3] at SS3
+    rw[N1] at SS3
     exact SS3
 
   ---Then will just use S3 and HSD to show APP
@@ -398,6 +397,7 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
         rw[ENNReal.ofReal_div_of_pos two_pos]
         simp only [ofReal_ofNat, ENNReal.add_halves]
       rw[rε , @add_comm] at HH
+      simp at HH
       exact HH
 
     exact le_trans S1 P2
