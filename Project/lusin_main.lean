@@ -50,6 +50,13 @@ theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
   apply MeasurableSet.iUnion (measurable_A f a hmf B hmb)
   done
 
+theorem disjoint_A: ∀ (i j : ℕ), i ≠ j → A f a B i ∩ A f a B j = ∅ := by
+  sorry
+
+theorem countable_subadd (A : ℕ → Set α ) : μ (⋃ i, ⋃ (_ : i ≤ N) , A i) ≤ ∑ᶠ (i ≤ N), μ (A i) := by
+  sorry
+
+
 --Next we show partial unions are monotone
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
@@ -120,13 +127,14 @@ theorem subset (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
 
 --The final result
 theorem set_difference_epsilon : ∃ N : ℕ,
-μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε * (1/2)) := by
+μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
   have ht := difference_epsilon μ f a B hf hcount ε hε
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (subset f a B k) (partial_union_A_measurable f a hmf B hmb k)
     (ne_top_of_lt (LE.le.trans_lt (measure_mono (subset f a B k)) (Ne.lt_top hf)))
   have h5 := tsub_le_iff_left.mpr h4
   rw[← hq] at h5
+  simp at h5
   exact ⟨ k, h5 ⟩
   done
 
@@ -312,8 +320,8 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
 
   have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
-    have S1 : (⋃ (i : ℕ) (_ : i ≤ N), K i) = ⋃ i ∈ (Set.Icc 0 N), K i := by
-      aesop
+
+    have S1 : (⋃ (i : ℕ) (_ : i ≤ N), K i) = ⋃ i ∈ (Set.Icc 0 N), K i := by aesop
     have KMP3 : ∀ i ∈ Set.Icc 0 N, IsCompact (K i) := by
       aesop
     have FN : Finite (Set.Icc 0 N) := by
@@ -344,21 +352,49 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
   --This part relates to showing APP
 
   have S1 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
-    ---have SS1 := (Set.diff_union_diff_cancel h2 h1).symm
+    have h2: (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ ⋃ i, ⋃ (_ : i ≤ N), A f a B i := by
+      simp
+      exact fun i i_1 => Set.subset_iUnion₂_of_subset i i_1 (HK1 i)
+    have SS1 := (Set.diff_union_diff_cancel (subset f a B N) h2).symm
+    ---Didn't want to state SS2 but I couldn't get it to work by just applying measure_union_le - implicit measure argument was causing a problem
+    have SS2 : μ ((B \ ⋃ (i : ℕ) (_ : i ≤ N), A f a B i) ∪ ((⋃ (i : ℕ) (_ : i ≤ N), A f a B i) \ ⋃ (i : ℕ) (_ : i ≤ N), K i)) ≤ μ (B \ ⋃ (i : ℕ) (_ : i ≤ N), A f a B i) + μ  ((⋃ (i : ℕ) (_ : i ≤ N), A f a B i) \ ⋃ (i : ℕ) (_ : i ≤ N), K i) := by
+      exact
+        measure_union_le (B \ ⋃ (i : ℕ) (_ : i ≤ N), A f a B i)
+          ((⋃ (i : ℕ) (_ : i ≤ N), A f a B i) \ ⋃ (i : ℕ) (_ : i ≤ N), K i)
+    rw[← SS1] at SS2
+    exact SS2
 
-    ---have SS2 := measure_union_le (Set.diff B ((⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (Set.diff (⋃ i, ⋃ (_ : i ≤ N), A f a B i) (⋃ i, ⋃ (_ : i ≤ N), K i))
+
+  have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) := by
+    --apply huge set_diff theorem here
+    have SS2 := set_diff_union N (A f a B) K HK1 (disjoint_A f a B)
+    rw[← SS2]
+
+    -- should just be countable subadditivity now
     sorry
 
-  have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i : Icc 0 N), μ ((A f a B i) \ (K i)) := by
-    --have SS2 := set_diff_union
+  have S3 : ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
+  -- should just follow from HK3 but can't get to work
     sorry
 
-  have S3 : ∑ᶠ (i : Icc 0 N), μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
-    sorry
+
+
 
   ---Then will just use S3 and HSD to show APP
   have APP : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i))  ≤  ENNReal.ofReal ε := by
-    sorry
+
+    have P2 : μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i) \ ⋃ i, ⋃  (_ : i ≤ N), K i) ≤
+    ENNReal.ofReal ε := by
+
+      have H := le_trans (add_le_add_left S3 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (add_le_add_right HSD (ENNReal.ofReal (ε / 2)))
+      rw[@add_comm] at H
+      have HH := le_trans (add_le_add_right S2 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i)) ) H
+      have H2 : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
+        sorry
+      rw[H2, @add_comm] at HH
+      exact HH
+
+    exact le_trans S1 P2
 
 
   have CTS : Continuous (Set.restrict (⋃ i, ⋃ (_ : i ≤ N), K i) f) := by
@@ -366,3 +402,6 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
+
+
+  
