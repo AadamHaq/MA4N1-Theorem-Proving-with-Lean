@@ -101,6 +101,7 @@ theorem difference_epsilon : ∃ k : ℕ, μ (B)  ≤
       exact mul_pos hε one_half_pos)
   have hl := (hN N le_rfl).1
   have hy := tsub_le_iff_right.mp hl
+
   exact ⟨N, hy⟩
   done
 
@@ -289,10 +290,8 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
 
 
 
-
-
 theorem mwe_4 (N : ℕ)(P Q Z: ℕ → Prop)(h : ∀ i, P i ∧ Q i ∧ Z i ) : ∀ i ≤ N, Q i := by
-  aesop
+  choose h1 h2 h3 using h
 
 
 --Will need isCompact_iUnion, and sub-additivity of measure
@@ -309,22 +308,27 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     apply zero_lt_two
 
   have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*N)) p
+  choose HK1 HK2 HK3 using HK
 
-
-  -- need to work out how to split HK
 
   have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
-    --have kmp : ∀ i ≤ N, IsCompact (K i) := by sorry
-    have JJ := mwe_4 N (fun i ↦ (K i ⊆ A f a B i)) (fun i ↦ IsCompact (K i)) (fun i ↦ (μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * ↑N)))) HK
-    simp at JJ
+    have S1 : (⋃ (i : ℕ) (_ : i ≤ N), K i) = ⋃ i ∈ (Set.Icc 0 N), K i := by
+      aesop
+    have KMP3 : ∀ i ∈ Set.Icc 0 N, IsCompact (K i) := by
+      aesop
+    have FN : Finite (Set.Icc 0 N) := by
+      exact Finite.of_fintype ↑(Set.Icc 0 N)
+    sorry
+
+
+
 
 
 
   have SS : (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ B := by
 
     have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by
-      --extract this from P
-      sorry
+      aesop
 
     have hh2 : ∀ i ≤ N, A f a B i ⊆ B := by
       intro i
