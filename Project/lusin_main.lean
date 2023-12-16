@@ -24,10 +24,10 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
-
 theorem triv1 : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
-  rw[ENNReal.ofReal_div_of_pos two_pos] 
+  rw[ENNReal.ofReal_div_of_pos two_pos]
   simp only [ofReal_ofNat, ENNReal.add_halves]
+
 
 theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i)≤ b) : ∑ᶠ (i ≤ N), m i ≤ N*b := by
   sorry
@@ -56,8 +56,12 @@ theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
 --Here we show some sets are measurable for later use
 theorem measurable_A : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
   intro b
-  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (a b))) (hmf)) hmb
-  done 
+  apply MeasurableSet.inter
+  apply MeasurableSet.preimage
+  apply MeasurableSet.singleton (a b)
+  apply hmf
+  exact hmb
+  done
 
 --We can just use 'MeasurableSet.iUnion (measurable_A f a h B hm)' later and then delete this
 theorem measurable_Ai_Union : MeasurableSet (⋃ i, A f a B i) := by
@@ -78,6 +82,7 @@ theorem disjoint_A (i j : ℕ) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ :=
   have ss := Set.inter_subset_left (f ⁻¹' {a i} ∩ f ⁻¹' {a j}) B
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
+
 
 --Next we show partial unions are monotone
 theorem monotone_A : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
@@ -310,6 +315,12 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
       rw [← @Set.biUnion_le_succ]
 
     rw[Set.union_diff_distrib.symm]
+    rw[s5]
+
+  rw[s1,ih,s2,s3,s4]
+  done
+
+
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
   have not0 : N > 0 := by
@@ -363,7 +374,7 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤ ∑ᶠ (i ≤ N), μ ((A f a B i) \ (K i)) := by
     --apply huge set_diff theorem here
-    have SS2 := set_diff_union N (A f a B) K HK1 (fun i j a_1 => disjoint_A f a B i j a_1)
+    have SS2 := set_diff_union N (A f a B) K HK1 (fun i j a_1 => disjoint_A f a hinj B i j a_1)
     rw[← SS2]
     -- should just be countable subadditivity now
     exact triv4 μ N (fun i ↦ (A f a B i \ K i))
@@ -393,10 +404,4 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
-    rw[s5]
-
-  rw[s1,ih,s2,s3,s4]
-  done
-
-
 
