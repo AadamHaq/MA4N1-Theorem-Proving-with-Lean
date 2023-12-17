@@ -421,7 +421,8 @@ theorem lusin_taking_countable_values: ∃ K : Set α, K ⊆ B ∧ IsCompact K �
       exact HH
     have P3 : (B \ ⋃ (i : ℕ) (_ : i ≤ N), K i) = (B\ ⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) := by
       simp 
-      aesop 
+      unhygienic ext 
+      simp_all only [Set.mem_diff, Set.mem_iUnion, Subtype.exists, mem_Icc, zero_le, true_and] 
     rw[P3] at S1
     exact le_trans S1 P2
   exact ⟨ (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i), SS, KMP,  APP, cts_final f a N (fun (i : Icc 0 N) ↦ K i) HK2' HK1' ⟩
