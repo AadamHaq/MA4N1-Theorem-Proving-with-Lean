@@ -24,6 +24,31 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
+--need to show here that f restricted to just one of the compact sets is cts
+variable (N : ℕ)
+theorem cts (K : Set α) (a : ℝ)(h1 : IsCompact K)(s1 : K ⊆ f ⁻¹'({a})) : Continuous (Set.restrict K f) := by
+  rw [@continuous_def]
+  sorry
+
+
+--this theorem then proves that f restricted to the union up to N is cts
+theorem cts_final (K : Icc 0 N → Set α)(h1: ∀ i : Icc 0 N, IsCompact (K i))(h2 : ∀ i : Icc 0 N, K i ⊆ f ⁻¹'({a i })) : ∀ (i : Icc 0 N), ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
+
+  have lf : LocallyFinite K := by
+    sorry
+  have h_clos : ∀ (i : Icc 0 N), IsClosed (K i) := by
+    --will have to prove that compact => closed here (may need to use t2/hausdorff etc)
+    sorry
+  have h_cont : ∀ (i : Icc 0 N), ContinuousOn f (K i) := by
+    --use cts here
+    sorry
+  exact fun i => LocallyFinite.continuousOn_iUnion lf h_clos h_cont
+  done
+
+--It should be quite easy to apply cts_final to Lusin, only pain will be redefining K so that K is a map from Icc 0 N, rather than ℕ
+
+
+
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
