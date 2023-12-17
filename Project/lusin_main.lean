@@ -27,7 +27,48 @@ variable (ε : ℝ)(hε: 0 < ε)
 --need to show here that f restricted to just one of the compact sets is cts
 
 theorem cts (K : Set α) (a : ℝ)(h1 : IsCompact K)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
+  have hh1 : f '' K ⊆ {a} := by
+    exact Set.mapsTo'.mp s1
+  have hh2 : Set.range (Set.restrict K f)  = f '' K := by
+    aesop
+  have hh3 : Set.range (Set.restrict K f) ⊆ {a} := by
+    exact Eq.trans_subset hh2 hh1
+  have hh4 :=  Set.eq_or_ssubset_of_subset hh3
+  have hh5 : Set.restrict K f = Set.restrict K (fun x  ↦ a ) := by
+    exact Set.restrict_eq_iff.mpr s1
+  cases' hh4 with c1 c2
+  have hh6 : Continuous (Set.restrict K f ) := by
+    rw[hh5]
+    have hh7 : Continuous (Set.restrict K (fun x  ↦ a )) := by
+      rw [← @continuousOn_iff_continuous_restrict]
+      exact continuousOn_const
+    exact hh7
+  exact continuousOn_iff_continuous_restrict.mpr hh6
+  have hh8 : Set.range (Set.restrict K f) = ∅  := by
+    exact Set.ssubset_singleton_iff.mp c2
+
+  rw [@continuousOn_iff_continuous_restrict]
   sorry
+
+theorem triv17 (h : Set.range f  = ∅ ) : Continuous f := by
+  sorry
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 --this theorem then proves that f restricted to the union up to N is cts
 theorem cts_final (N : ℕ)(K : Icc 0 N → Set α)(h1: ∀ (i : Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Icc 0 N), K i ⊆ f ⁻¹'({a i })) : ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
@@ -441,7 +482,6 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
       sorry
     rw[P3] at S1
     exact le_trans S1 P2
-
 
   exact ⟨ (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i), SS, KMP,  APP, cts_final f a N (fun (i : Icc 0 N) ↦ K i) HK2' HK1' ⟩
   done
