@@ -25,28 +25,22 @@ variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B 
 variable (ε : ℝ)(hε: 0 < ε)
 
 --need to show here that f restricted to just one of the compact sets is cts
-variable (N : ℕ)
-theorem cts (K : Set α) (a : ℝ)(h1 : IsCompact K)(s1 : K ⊆ f ⁻¹'({a})) : Continuous (Set.restrict K f) := by
-  rw [@continuous_def]
+
+theorem cts (K : Set α) (a : ℝ)(h1 : IsCompact K)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
   sorry
 
-
 --this theorem then proves that f restricted to the union up to N is cts
-theorem cts_final (K : Icc 0 N → Set α)(h1: ∀ i : Icc 0 N, IsCompact (K i))(h2 : ∀ i : Icc 0 N, K i ⊆ f ⁻¹'({a i })) : ∀ (i : Icc 0 N), ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
-
+theorem cts_final (N : ℕ)(K : Icc 0 N → Set α)(h1: ∀ (i : Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Icc 0 N), K i ⊆ f ⁻¹'({a i })) : ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
   have lf : LocallyFinite K := by
-    sorry
-  have h_clos : ∀ (i : Icc 0 N), IsClosed (K i) := by
-    --will have to prove that compact => closed here (may need to use t2/hausdorff etc)
-    sorry
+    exact locallyFinite_of_finite K
   have h_cont : ∀ (i : Icc 0 N), ContinuousOn f (K i) := by
     --use cts here
-    sorry
-  exact fun i => LocallyFinite.continuousOn_iUnion lf h_clos h_cont
+    intro i
+    specialize h1 i
+    specialize h2 i
+    exact cts  f (K i) (a i) h1 h2
+  exact LocallyFinite.continuousOn_iUnion lf (fun i => IsCompact.isClosed (h1 i)) h_cont
   done
-
---It should be quite easy to apply cts_final to Lusin, only pain will be redefining K so that K is a map from Icc 0 N, rather than ℕ
-
 
 
 -- We define the sequence of sets A_i as follows
@@ -327,11 +321,7 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
   rw[s1,ih,s2,s3,s4]
   done
 
---These results are needed to prove Lusin
-theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc 0 N) → IsCompact (K i)) : IsCompact (⋃  i ∈ (Icc 0 N) , K i) := by
-  exact isCompact_biUnion (Icc 0 N) h
-
-
+--These results are needed in calculations to prove Lusin
 theorem triv1(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
   induction' N with N ih
   aesop
@@ -366,7 +356,7 @@ theorem triv2 (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.o
     done
 
 
-theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
+theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ ContinuousOn f K := by
 
   have ⟨ N, HSD ⟩ := set_difference_epsilon μ f a hmf B hmb hf hcount ε hε
 
@@ -379,29 +369,30 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   have ⟨ K , HK ⟩  := compact_subset_N μ f a hmf B hmb  hf (ε/(2*(N+1))) p
   choose HK1 HK2 HK3 using HK
-  have HK3' : ∀ i ≤ N, μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * (N+1))) := by
-    aesop
 
-  have KMP : IsCompact (⋃ i, ⋃ (_ : i ≤ N), K i) := by
-    have S1 : (⋃ (i : ℕ) (_ : i ≤ N), K i) = ⋃ i ∈ (Icc 0 N), K i := by aesop
-    have KMP1 : ∀ i ∈ Icc 0 N, IsCompact (K i) := by
-      aesop
-    have KMP2 :=  compact_union N K KMP1
-    aesop
+  have HK1' : ∀ i : Icc 0 N, K i ⊆ f ⁻¹'({a i }) := by
+    intro i
+    specialize HK1 i
+    unfold A at HK1
+    exact le_trans HK1 (Set.inter_subset_left (f ⁻¹' {a ↑i}) B)
 
-  have SS : (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ B := by
-    have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by
-      aesop
+  have HK2' : ∀ i : Icc 0 N, IsCompact (K i) := by aesop
+  have HK3' : ∀ i ≤ N, μ (A f a B i \ K i) ≤ ENNReal.ofReal (ε / (2 * (N+1))) := by aesop
 
+  have KMP : IsCompact (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) := by
+    have KMP1 : ∀ i ∈ Icc 0 N, IsCompact (K i) := by aesop
+    exact isCompact_iUnion HK2'
+
+  have SS : (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) ⊆ B := by
+    have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by aesop
     have hh2 : ∀ i ≤ N, A f a B i ⊆ B := by
       intro i
       unfold A
       aesop
-
     have hh3 : ∀ i ≤ N, K i ⊆ B := by
       exact fun i a_1 => Set.Subset.trans (hh1 i a_1) (hh2 i a_1)
-
-    exact Set.iUnion₂_subset hh3
+    have hh4 := Set.iUnion₂_subset hh3
+    aesop
 
   --This part relates to showing APP
   have S1 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
@@ -432,9 +423,7 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     rw[triv2 ε N] at SS3
     exact SS3
 
-  ---Then will just use S3 and HSD to show APP
-  have APP : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i))  ≤  ENNReal.ofReal ε := by
-
+  have APP : μ (B \ ⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K i) ↑i)  ≤  ENNReal.ofReal ε := by
     have P2 : μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i) \ ⋃ i, ⋃  (_ : i ≤ N), K i) ≤
     ENNReal.ofReal ε := by
 
@@ -448,10 +437,12 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
       simp at HH
       exact HH
 
+    have P3 : (B \ ⋃ (i : ℕ) (_ : i ≤ N), K i) = (B\ ⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) := by
+      sorry
+    rw[P3] at S1
     exact le_trans S1 P2
 
-  have CTS : Continuous (Set.restrict (⋃ i, ⋃ (_ : i ≤ N), K i) f) := by
-    sorry
 
-  exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
+  exact ⟨ (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i), SS, KMP,  APP, cts_final f a N (fun (i : Icc 0 N) ↦ K i) HK2' HK1' ⟩
   done
+
