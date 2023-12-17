@@ -24,17 +24,30 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
---I made triv22 as an easier version of triv2 to prove
-theorem triv22(N : ℕ)(m : ℕ → ENNReal)(h : ∀ i ≤ N, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ ∑ i in Icc 0 N, b := by
-  sorry
 
-theorem triv2 (N: ℕ)(b : ENNReal )(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1)*b := by
-  have h1 : ∑ i in Icc 0 N, m i ≤ ∑ i in Icc 0 N, b := by
-    sorry
-  have h2 : ∑ i in Icc 0 N, b = (N+1)*b := by
+theorem triv2(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
+  induction' N with N ih
+  aesop
+  simp
+  rw [add_assoc, @add_left_comm, @one_add_mul, add_comm, ← Nat.add_one]
+
+  have h2 : ∑ i in Icc 0 (N + 1), m i = (∑ i in Icc 0 N , m i ) + m (N+1) := by
+    have hh2 : Icc 0 (N + 1) = (Icc 0 N) ∪ {N+1} := by
+      sorry
+    rw[hh2]
+    rw[Finset.sum_union]
     aesop
-  exact Eq.trans_ge h2 h1
+    aesop
 
+  rw[h2]
+
+  have h3 : ∑ i in Icc 0 N, m i + m (N + 1) ≤ (↑N + 1) * b + m (N+1) := by
+    exact add_le_add_right ih (m (N+1))
+
+  have h4 : (↑N+1)*b + m (N+1) ≤ (↑N+1)*b + b := by
+    exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
+
+  exact le_trans h3 h4
 
 
 theorem triv3 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
