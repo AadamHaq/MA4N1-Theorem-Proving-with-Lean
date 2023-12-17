@@ -24,44 +24,6 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
-
-theorem triv2(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
-  induction' N with N ih
-  aesop
-  simp
-  rw [add_assoc, @add_left_comm, @one_add_mul, add_comm, ← Nat.add_one]
-
-  have h2 : ∑ i in Icc 0 (N + 1), m i = (∑ i in Icc 0 N , m i ) + m (N+1) := by
-    have hh2 : Icc 0 (N + 1) = (Icc 0 N) ∪ {N+1} := by
-      sorry
-    rw[hh2]
-    rw[Finset.sum_union]
-    aesop
-    aesop
-
-  rw[h2]
-
-  have h3 : ∑ i in Icc 0 N, m i + m (N + 1) ≤ (↑N + 1) * b + m (N+1) := by
-    exact add_le_add_right ih (m (N+1))
-
-  have h4 : (↑N+1)*b + m (N+1) ≤ (↑N+1)*b + b := by
-    exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
-
-  exact le_trans h3 h4
-
-
-theorem triv3 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
-    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
-    have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
-      have h2 := ENNReal.ofReal_coe_nat (N+1)
-      aesop
-    rw[h, ENNReal.div_self, one_mul]
-    simp
-    aesop
-    exact Nat.cast_add_one_pos N
-    done
-
-
 -- We define the sequence of sets A_i as follows
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
@@ -340,9 +302,46 @@ theorem set_diff_union (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : �
   rw[s1,ih,s2,s3,s4]
   done
 
---Will need this result in the final theorem
+--These results are needed to prove Lusin
 theorem compact_union (N: ℕ)(K : ℕ → Set α)(h : ∀ (i : ℕ), i ∈ (Icc 0 N) → IsCompact (K i)) : IsCompact (⋃  i ∈ (Icc 0 N) , K i) := by
   exact isCompact_biUnion (Icc 0 N) h
+
+
+theorem triv1(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
+  induction' N with N ih
+  aesop
+  simp
+  rw [add_assoc, @add_left_comm, @one_add_mul, add_comm, ← Nat.add_one]
+  have h2 : ∑ i in Icc 0 (N + 1), m i = (∑ i in Icc 0 N , m i ) + m (N+1) := by
+    have hh2 : Icc 0 (N + 1) = (Icc 0 N) ∪ {N+1} := by
+      have h : Set.Icc 0 (N + 1) = (Set.Icc 0 N) ∪ {N+1} := by
+        have ge0 : 0 ≤ Nat.succ N := by aesop
+        rw[Set.union_singleton, Nat.add_one,← Nat.succ_eq_succ, ← Order.Icc_succ_right ge0]
+      apply Finset.coe_injective; push_cast
+      exact h
+    rw[hh2]
+    rw[Finset.sum_union]
+    aesop
+    aesop
+  rw[h2]
+  have h3 : ∑ i in Icc 0 N, m i + m (N + 1) ≤ (↑N + 1) * b + m (N+1) := by
+    exact add_le_add_right ih (m (N+1))
+  have h4 : (↑N+1)*b + m (N+1) ≤ (↑N+1)*b + b := by
+    exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
+  exact le_trans h3 h4
+
+
+theorem triv2 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
+    rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
+    have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
+      have h2 := ENNReal.ofReal_coe_nat (N+1)
+      aesop
+    rw[h, ENNReal.div_self, one_mul]
+    simp
+    aesop
+    exact Nat.cast_add_one_pos N
+    done
+
 
 theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ Continuous (Set.restrict K f) := by
 
@@ -405,9 +404,9 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
     aesop
 
   have S3 : ∑ i in Icc 0 N, μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
-    have SS3 := triv2 N (ENNReal.ofReal (ε/(2*(N+1)))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3
+    have SS3 := triv1 N (ENNReal.ofReal (ε/(2*(N+1)))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3
     simp at SS3
-    rw[triv3 ε N] at SS3
+    rw[triv2 ε N] at SS3
     exact SS3
 
   ---Then will just use S3 and HSD to show APP
@@ -433,3 +432,5 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
+
+ 
