@@ -314,11 +314,9 @@ theorem triv1(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) 
   rw [add_assoc, @add_left_comm, @one_add_mul, add_comm, ← Nat.add_one]
   have h2 : ∑ i in Icc 0 (N + 1), m i = (∑ i in Icc 0 N , m i ) + m (N+1) := by
     have hh2 : Icc 0 (N + 1) = (Icc 0 N) ∪ {N+1} := by
-      have h : Set.Icc 0 (N + 1) = (Set.Icc 0 N) ∪ {N+1} := by
-        have ge0 : 0 ≤ Nat.succ N := by aesop
-        rw[Set.union_singleton, Nat.add_one,← Nat.succ_eq_succ, ← Order.Icc_succ_right ge0]
       apply Finset.coe_injective; push_cast
-      exact h
+      have ge0 : 0 ≤ Nat.succ N := by aesop
+      rw[Set.union_singleton, Nat.add_one,← Nat.succ_eq_succ, ← Order.Icc_succ_right ge0]
     rw[hh2]
     rw[Finset.sum_union]
     aesop
@@ -331,7 +329,7 @@ theorem triv1(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) 
   exact le_trans h3 h4
 
 
-theorem triv2 (N : ℕ): (↑N + 1)* ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
+theorem triv2 (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
     rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
     have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
       have h2 := ENNReal.ofReal_coe_nat (N+1)
@@ -432,5 +430,3 @@ theorem lusin: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNRe
 
   exact ⟨ (⋃ i, ⋃ (_ : i ≤ N), K i), SS, KMP,  APP, CTS ⟩
   done
-
- 
