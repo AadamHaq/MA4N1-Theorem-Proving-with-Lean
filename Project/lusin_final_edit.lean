@@ -430,13 +430,6 @@ theorem lusin_taking_countable_values: ∃ K : Set α, K ⊆ B ∧ IsCompact K �
 
 --Next part
 
-theorem triv3 (a b: ℝ) : a ≥ b ↔ a - b ≥ 0 := by 
-  simp_all only [sub_nonneg] 
-
-theorem triv4 (a b: ℝ) : a - a * b = a * (1 - b) := by 
-  sorry
-
-
 theorem uniform (x : α )(N : ℕ  ): (2 ^ N)⁻¹ ≥ 1 * f x - (2 ^ N)⁻¹ * ↑⌊2 ^ N * f x⌋₊ := by
   have two_inv : (2 ^ N)⁻¹ * (2 ^ N) = (1 : ℝ ) := by
     rw [inv_mul_eq_div]
@@ -446,10 +439,10 @@ theorem uniform (x : α )(N : ℕ  ): (2 ^ N)⁻¹ ≥ 1 * f x - (2 ^ N)⁻¹ * 
   have h3 : 2 ^ N * f x - ↑⌊2 ^ N * f x⌋₊ ≤ 1 := by sorry
   rw[h2, mul_assoc, ← mul_sub_left_distrib ]
   have h4 : 0 ≤ ((2:ℝ) ^ N)⁻¹ - (2 ^ N)⁻¹ * (2 ^ N * f x - ↑⌊2 ^ N * f x⌋₊) := by 
-    rw[triv4]
+    nth_rw 1 [← mul_one ((2:ℝ) ^ N)⁻¹, ← mul_sub_left_distrib] 
     have two_pow_nn : 0 ≤ ((2:ℝ) ^ N)⁻¹ := by sorry
     have idk : 0 ≤ (1 - (2 ^ N * f x - ↑⌊2 ^ N * f x⌋₊)) := by sorry
-    apply mul_nonneg (two_pow_nn) (idk)
-  rw[triv3] 
+    apply mul_nonneg (two_pow_nn) (idk) 
+  apply sub_nonneg.1
   apply h4 
   done
