@@ -206,6 +206,7 @@ theorem collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α)(h2 : ∀
   simp
   exact hj
 
+-- Proof that if the A_i's are disjoint, then the compact subsets of the A_i's are also disjoint. This is used in the theorem after.
 theorem disjoint_K (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : ∀ i ≤ n,  Disjoint (K i) (K (n+1)) := by
   intro i
   have neq (h : i ≤ n) :  i ≠ n+1  := by
@@ -214,6 +215,7 @@ theorem disjoint_K (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i
     exact Set.disjoint_iff_inter_eq_empty.mpr (h2 i (n + 1) h)
   exact fun a => Set.disjoint_of_subset (h1 i) (h1 (n + 1)) (dsj2 (neq a))
 
+-- Proof that for disjoint A_i with disjoint compact subsets K_i that the union of (A_i \ K_i) is the same as the union of A_i \ union of K_i. This is used in the final proof of Lusin's theorem.
 theorem set_diff_union_n (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
 ⋃ i, ⋃ (_ : i ≤ n), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n), K i) := by
   induction' n with n ih
@@ -274,7 +276,7 @@ theorem set_diff_union_n (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 :
   rw[s1,ih,s2,s3,s4]
   done
 
---These results are needed in calculations to prove Lusin
+-- A fairly simple theorem that states if m_i <_ b for all i, then the sum from 0 to N of m_i is less than or equal to (N+1)*b. This is clear from the definitions of upper bounds. It is used in the final proof of Lusin's Theorem.
 theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
   induction' N with N ih
   aesop
@@ -296,6 +298,8 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
     exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
   exact le_trans h3 h4
 
+
+-- Another simple theorem used in the final proof of Lusin's Theorem that cancells the constant in the denominator. It is a seperate theorem due to the technicalities of ENNReal.
 theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
     rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
     have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
@@ -307,7 +311,7 @@ theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2
     exact Nat.cast_add_one_pos N
     done
 
---need to show here that f restricted to just one of the compact sets is restriction_f_K_continuous
+--A proof that shows the restriction of the function f to just one of the sets K is continuous. This is used in the theorem after which is a generalisation.
 theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
   have hh1 : f '' K ⊆ {a} := by
     exact Set.mapsTo'.mp s1
@@ -334,7 +338,7 @@ theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a
   exact continuousOn_empty f
   done
 
---this theorem then proves that f restricted to the union up to N is restriction_f_K_continuous
+-- This theorem then proves that f restricted to the union up to N of K sets is continuous. This is used in the final proof of Lusin's Theorem.
 theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: ∀ (i : Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Icc 0 N), K i ⊆ f ⁻¹'({a i })) : ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
   have lf : LocallyFinite K := by
     exact locallyFinite_of_finite K
@@ -347,6 +351,7 @@ theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: 
   exact LocallyFinite.continuousOn_iUnion lf (fun i => IsCompact.isClosed (h1 i)) h_cont
   done
 
+-- Finally, below is the statement and proof of Lusin's Theorem, using the previous theorems in its proof.
 theorem lusin_countable: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ ContinuousOn f K := by
   have ⟨ N, HSD ⟩ := B_set_diff_Ai_leq_epsilon μ f a hmf B hmb hf hcount ε hε
   have p : 0 < (ε / (2 * (N+1) )) := by
