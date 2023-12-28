@@ -24,23 +24,28 @@ variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Inje
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
--- We define the sequence of sets A_i as follows
+-- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, but we are using B here to avoid confusion.
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
--- Since f maps to {a1, a2, ...} we have ⋃ i f ⁻¹({a i}) is the whole space, and thus
--- ⋃ i A_i = B which is proven here
-theorem B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
+
+/-
+We begin by verifying the key properties of the expressions we have introduced.
+-/
+
+-- Since f maps to {a1, a2, ...} we have that ⋃ i f ⁻¹({a i}) is the whole space, and thus ⋃ i A_i = B, which is proven here.
+lemma B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   rw[← Set.iUnion_inter B (fun i ↦ f ⁻¹'({a i})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion a, ← hcount ]
   simp only [Set.inter_eq_right]
   simp_rw[Set.subset_preimage_image f B]
   done
 
---Here we show some sets are measurable for later use
-theorem measurable_Ai : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
+-- A_i are measurable, for all i.
+lemma measurable_Ai : ∀ (i : ℕ), MeasurableSet (A f a B i) := by
   intro b
   apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (a b)) hmf)) (hmb)
   done
 
+-- The sequence (A_i) is a sequence of pairwise disjoint sets.
 theorem disjoint_Ai (i j : ℕ) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ := by
   unfold A
   have hj : Disjoint (f ⁻¹' {a i}) (f ⁻¹' {a j}) := by
@@ -56,8 +61,7 @@ theorem disjoint_Ai (i j : ℕ) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ :
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
 
-
---Next we show partial unions are monotone
+-- Next we show partial unions of the elements of the sequence (A_i) are monotone.
 theorem monotone_Ai : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
   intro x y
@@ -68,12 +72,18 @@ theorem monotone_Ai : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) :
   exact hjy
   done
 
-theorem element_subset_union_elements (s: ℕ → Set α) (j : ℕ): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , s i  := by
+-- Any element of a sequence is contained in the union of the elements of the sequence up to that element. Quite obvious, but we declare and prove this to help us later.
+lemma element_subset_union_elements (s: ℕ → Set α) (j : ℕ): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , s i  := by
   apply Set.subset_biUnion_of_mem
   apply Nat.le_refl
   done
 
-theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
+
+/-
+The next seven lemmas/theorems are dedicated to proving our first result involving a gap of ε/2 between ⋃ A_i and the finite union ⋃ k ≤ n, A_k. The value of n is provided by the definition of the continuity of measure (i.e. ∀ ε, ∃ n such that...).
+-/
+
+lemma union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
  ⋃ i, (⋃ j, ⋃ (_ : j ≤ i) , s j ) := by
   rw[superset_antisymm_iff]
   constructor
@@ -86,14 +96,14 @@ theorem union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
   exact Set.subset_iUnion (fun x =>  ⋃ j, ⋃ (_ : j ≤ x), s j) t
   done
 
-theorem union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := by
+lemma union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := by
   rw[(union_partial_eq_union (A f a B)).symm]
   unfold A
   apply B_eq_union_Ai
   exact hcount
   done
 
-theorem continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i))
+lemma continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i))
   atTop (𝓝 (μ (B))) := by
   nth_rw 2 [← union_partial_Ai_eq_B f a B hcount]
   apply tendsto_measure_iUnion
@@ -120,7 +130,7 @@ theorem partial_union_Ai_measurable (N : ℕ): MeasurableSet (⋃ i, ⋃ (_ : i 
   exact fun _ => measurable_Ai f a hmf B hmb b
   done
 
-theorem Ai_subset_B (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
+lemma Ai_subset_B (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   unfold A
   simp_all only [ne_eq, Set.iUnion_subset_iff, Set.inter_subset_right, implies_true, forall_const]
   done
@@ -138,13 +148,17 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : ℕ,
   exact ⟨ k, h5 ⟩
   done
 
+
+/-
+We now turn our attention to the comapact subsets of each A_i, in order to achieve the bound μ(A_N \ K_N) ≤ ε/2N. We must first verify the existence of these compact subsets K_N, before once again applying continuity of measure for the desired bound. The bound in this case is not as simple as before, as our bound is now contingent on the value of N.
+-/
+
 --Here we obtain the compact subsets K_i of A_i for each i, after two technical results
 theorem finite_Ai (i : ℕ) : μ (A f a B i) ≠ ∞ := by
   have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
   exact LT.lt.ne hy
   done
-
 
 ---We will take δ = ε/2N once N exists
 theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal δ    := by
@@ -154,7 +168,6 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K �
   rw[← hq] at HK4
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
-
 
 theorem Ai_set_diff_compact_subset_Ai_leq_delta (δ : ℝ)(hδ : 0 < δ ): ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
   choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
@@ -298,8 +311,7 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
     exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
   exact le_trans h3 h4
 
-
--- Another simple theorem used in the final proof of Lusin's Theorem that cancells the constant in the denominator. It is a seperate theorem due to the technicalities of ENNReal.
+-- Another simple theorem used in the final proof of Lusin's Theorem that cancels the constant in the denominator. It is a seperate theorem due to the technicalities of ENNReal.
 theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
     rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
     have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
@@ -310,6 +322,11 @@ theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2
     aesop
     exact Nat.cast_add_one_pos N
     done
+
+
+/-
+The final component of Lusin's Theorem pertains to demonstrating that f is continous when restricted to the set K = ⋃ K_i. This is proven using the two theorems below:
+-/
 
 --A proof that shows the restriction of the function f to just one of the sets K is continuous. This is used in the theorem after which is a generalisation.
 theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
@@ -351,7 +368,8 @@ theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: 
   exact LocallyFinite.continuousOn_iUnion lf (fun i => IsCompact.isClosed (h1 i)) h_cont
   done
 
--- Finally, below is the statement and proof of Lusin's Theorem, using the previous theorems in its proof.
+
+-- Finally, below is the statement and proof of Lusin's Theorem for when f takes countably many values, using the previous theorems in its proof.
 theorem lusin_countable: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ ContinuousOn f K := by
   have ⟨ N, HSD ⟩ := B_set_diff_Ai_leq_epsilon μ f a hmf B hmb hf hcount ε hε
   have p : 0 < (ε / (2 * (N+1) )) := by
