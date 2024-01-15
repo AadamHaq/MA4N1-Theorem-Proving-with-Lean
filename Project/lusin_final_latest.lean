@@ -25,6 +25,9 @@ variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B 
 variable (ε : ℝ)(hε: 0 < ε)
 
 -- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, but we are using B here to avoid confusion.
+-- f takes finitely many values
+def X (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
+-- f takes countable many values
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
 
