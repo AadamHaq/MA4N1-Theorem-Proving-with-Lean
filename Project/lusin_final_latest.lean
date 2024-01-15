@@ -60,7 +60,7 @@ theorem disjoint_Xj (i j : Set.Icc 1 n) (h : i ≠ j) :  X g x Y i ∩ X g x Y j
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
 
-theorem monotone_Yj : Monotone (fun k => ⋃ j, ⋃ (_ : j ≤ k) , X g x Y j) := by
+theorem monotone_Xj : Monotone (fun k => ⋃ j, ⋃ (_ : j ≤ k) , X g x Y j) := by
   unfold Monotone
   intro a b
   simp only [ge_iff_le, not_le, Nat.lt_one_iff, gt_iff_lt, Set.mem_Icc,
@@ -89,6 +89,19 @@ lemma union_partial_eq_union_fin (s: Set.Icc 1 n → Set α): ⋃ j, s j =
   exact Set.subset_iUnion (fun x =>  ⋃ i, ⋃ (_ : i ≤ x), s i) t
   done
 
+lemma union_partial_Xj_eq_Y: ⋃ k,  ⋃ j, ⋃ (_ : j ≤ k), X g x Y j = Y := by
+  rw[(union_partial_eq_union_fin (X g x Y)).symm]
+  unfold X
+  apply Y_eq_union_Xj
+  exact hfin
+  done
+
+lemma continuity_of_measure_fin: Tendsto (fun k ↦ μ (⋃ j, ⋃ (_ : j ≤ k), X g x Y j))
+  atTop (𝓝 (μ (Y))) := by
+  nth_rw 2 [← union_partial_Xj_eq_Y g x Y hfin]
+  apply tendsto_measure_iUnion
+  apply monotone_Xj
+  done
 
 /-
 We begin by verifying the key properties of the expressions we have introduced.
