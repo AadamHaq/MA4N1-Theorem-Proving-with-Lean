@@ -20,29 +20,48 @@ namespace Lusin
 
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
-variable [BorelSpace ℝ] (g: α → ℝ) (x: Set.Icc 1 n → ℝ) (hinj : Function.Injective x) (hmf: Measurable g)
-variable (Y : Set α)(hmb : MeasurableSet Y)(hf : μ Y ≠ ∞)(hcount : g '' Y = Set.range x)
+-- Finite Case
+variable [BorelSpace ℝ] (g: α → ℝ) (x: Set.Icc 1 n → ℝ) (hinjx : Function.Injective x) (hmg: Measurable g)
+variable (Y : Set α)(hmy : MeasurableSet Y)(hg : μ Y ≠ ∞)(hfin : g '' Y = Set.range x)
+-- Countable Case
+variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Injective a) (hmf: Measurable f)
+variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
 -- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, but we are using B here to avoid confusion.
 -- f takes finitely many values
 def X (j : Set.Icc 1 n) := g ⁻¹'({x j}) ∩ Y
+-- Countable case
+def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
-lemma Y_eq_union_Xi : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
-  rw[← Set.iUnion_inter Y (fun j ↦ g ⁻¹'({x j})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion x, ← hcount ]
+lemma Y_eq_union_Xj : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
+  rw[← Set.iUnion_inter Y (fun j ↦ g ⁻¹'({x j})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion x, ← hfin ]
   simp only [Set.inter_eq_right]
   simp_rw[Set.subset_preimage_image g Y]
   done
 
-lemma measurable_Xi : ∀ (j : Set.Icc 1 n), MeasurableSet (X g x Y j) := by
+lemma measurable_Xj : ∀ (j : Set.Icc 1 n), MeasurableSet (X g x Y j) := by
   intro y
-  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (x y)) hmf)) (hmb)
+  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (x y)) hmg)) (hmy)
   done
 
+theorem disjoint_Xj (i j : Set.Icc 1 n) (h : i ≠ j) :  X g x Y i ∩ X g x Y j= ∅ := by
+  unfold X
+  have hj : Disjoint (g ⁻¹' {x i}) (g ⁻¹' {x j}) := by
+    have hj2 : Disjoint {x i} {x j} := by
+      have neq : x i ≠ x j := by
+        exact Function.Injective.ne hinjx h
+      rw[← Set.disjoint_singleton] at neq
+      exact neq
+    exact Disjoint.preimage g hj2
+  rw [@Set.inter_inter_inter_comm]
+  simp
+  have ss := Set.inter_subset_left (g ⁻¹' {x i} ∩ g ⁻¹' {x j}) Y
+  rw [@Set.disjoint_iff_inter_eq_empty] at hj
+  exact Set.subset_eq_empty ss hj
+
 -- f takes countable many values
-variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Injective a) (hmf: Measurable f)
-variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
-def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
+
 
 
 /-
