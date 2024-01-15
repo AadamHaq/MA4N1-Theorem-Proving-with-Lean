@@ -20,14 +20,23 @@ namespace Lusin
 
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
-variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Injective a) (hmf: Measurable f)
-variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
+variable [BorelSpace ℝ] (g: α → ℝ) (x: Set.Icc 1 n → ℝ) (hinj : Function.Injective x) (hmf: Measurable g)
+variable (Y : Set α)(hmb : MeasurableSet Y)(hf : μ Y ≠ ∞)(hcount : g '' Y = Set.range x)
 variable (ε : ℝ)(hε: 0 < ε)
 
 -- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, but we are using B here to avoid confusion.
 -- f takes finitely many values
-def X (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
+def X (j : Set.Icc 1 n) := g ⁻¹'({x j}) ∩ Y
+
+lemma Y_eq_union_Xi : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
+  rw[← Set.iUnion_inter Y (fun j ↦ g ⁻¹'({x j})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion x, ← hcount ]
+  simp only [Set.inter_eq_right]
+  simp_rw[Set.subset_preimage_image g Y]
+  done
+
 -- f takes countable many values
+variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Injective a) (hmf: Measurable f)
+variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
 
