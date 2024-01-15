@@ -60,9 +60,16 @@ theorem disjoint_Xj (i j : Set.Icc 1 n) (h : i ≠ j) :  X g x Y i ∩ X g x Y j
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
 
--- f takes countable many values
-
-
+theorem monotone_Yj : Monotone (fun k => ⋃ j, ⋃ (_ : j ≤ k) , X g x Y j) := by
+  unfold Monotone
+  intro a b
+  simp only [ge_iff_le, not_le, Nat.lt_one_iff, gt_iff_lt, Set.mem_Icc,
+    Set.le_eq_subset, Set.iUnion_subset_iff]
+  intro hab i hia
+  have hib := hia.trans hab
+  apply Set.subset_biUnion_of_mem
+  exact hib
+  done
 
 /-
 We begin by verifying the key properties of the expressions we have introduced.
