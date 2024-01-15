@@ -103,6 +103,17 @@ lemma continuity_of_measure_fin: Tendsto (fun k ↦ μ (⋃ j, ⋃ (_ : j ≤ k)
   apply monotone_Xj
   done
 
+theorem partial_union_Xj_up_Y_leq_epsilon : ∃ k : Set.Icc 1 n, μ (Y)  ≤
+μ (⋃ j, ⋃ (_ : j ≤ k), X g x Y j) + ENNReal.ofReal (ε * (1/2))  := by
+  have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hg).1
+    (continuity_of_measure_fin μ g x Y hfin) (ENNReal.ofReal (ε * (1/2))) (by
+      rw [gt_iff_lt, ENNReal.ofReal_pos]
+      exact mul_pos hε one_half_pos)
+  have hl := (hN N le_rfl).1
+  have hy := tsub_le_iff_right.mp hl
+
+  exact ⟨N, hy⟩
+  done
 /-
 We begin by verifying the key properties of the expressions we have introduced.
 -/
