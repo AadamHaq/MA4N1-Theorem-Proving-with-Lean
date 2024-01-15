@@ -34,6 +34,11 @@ lemma Y_eq_union_Xi : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
   simp_rw[Set.subset_preimage_image g Y]
   done
 
+lemma measurable_Xi : ∀ (j : Set.Icc 1 n), MeasurableSet (X g x Y j) := by
+  intro y
+  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (x y)) hmf)) (hmb)
+  done
+
 -- f takes countable many values
 variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Injective a) (hmf: Measurable f)
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
