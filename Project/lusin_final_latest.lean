@@ -71,6 +71,11 @@ theorem monotone_Yj : Monotone (fun k => ⋃ j, ⋃ (_ : j ≤ k) , X g x Y j) :
   exact hib
   done
 
+lemma element_subset_union_elements_fin (s: Set.Icc 1 n → Set α) (j : Set.Icc 1 n): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , s i  := by
+  apply Set.subset_biUnion_of_mem
+  apply Nat.le_refl
+  done
+
 /-
 We begin by verifying the key properties of the expressions we have introduced.
 -/
