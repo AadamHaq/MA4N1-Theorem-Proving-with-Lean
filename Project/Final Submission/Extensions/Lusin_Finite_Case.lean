@@ -149,3 +149,11 @@ theorem finite_Ai (i : Set.Icc 1 n) : μ (A f a B i) ≠ ∞ := by
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
   exact LT.lt.ne hy
   done
+
+theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : Set.Icc 1 n) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal δ    := by
+  have ⟨ K, HK1, HK2, HK3 ⟩ := MeasurableSet.exists_isCompact_lt_add (measurable_Ai f a hmf B hmb i) (finite_Ai μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
+  have hq := measure_diff (HK1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
+  have HK4 := tsub_le_iff_left.mpr (le_of_lt HK3)
+  rw[← hq] at HK4
+  exact ⟨ K, HK1, HK2, HK4 ⟩
+  done
