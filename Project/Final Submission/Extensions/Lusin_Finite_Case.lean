@@ -13,8 +13,7 @@ set_option maxHeartbeats 0
 open MeasureTheory ENNReal Filter Finset BigOperators
 open scoped Topology
 
--- Aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
--- This is slightly more restrictive than the theorem in Cohn's book
+-- The aim of this lean file is to prove Lusin's Theorem in the finite case. The previous file works for countable values however does not fully work for the finite case. This file attemps to adapt the proof and rewrite it in terms of finite many values i.e. the function goes from [1, n] -> R rather than what was shown previously; N -> R
 
 namespace Lusin
 
@@ -24,8 +23,6 @@ variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α]
 variable [BorelSpace ℝ] (g: α → ℝ) (x: Set.Icc 1 n → ℝ) (hinjx : Function.Injective x) (hmg: Measurable g)
 variable (Y : Set α)(hmy : MeasurableSet Y)(hg : μ Y ≠ ∞)(hfin : g '' Y = Set.range x)
 
-
--- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, but we are using B here to avoid confusion.
 -- f takes finitely many values
 def X (j : Set.Icc 1 n) := g ⁻¹'({x j}) ∩ Y
 
