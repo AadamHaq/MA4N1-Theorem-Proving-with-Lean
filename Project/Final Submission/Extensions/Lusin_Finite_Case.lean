@@ -26,6 +26,7 @@ variable (Y : Set α)(hmy : MeasurableSet Y)(hg : μ Y ≠ ∞)(hfin : g '' Y = 
 -- f takes finitely many values
 def X (j : Set.Icc 1 n) := g ⁻¹'({x j}) ∩ Y
 
+-- All of the previous lemmas and theorems are similar to the countable case, but with finite variables. The proofs are similar but there are some subtle differences.
 lemma Y_eq_union_Xj : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
   rw[← Set.iUnion_inter Y (fun j ↦ g ⁻¹'({x j})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion x, ← hfin ]
   simp only [Set.inter_eq_right]
@@ -106,3 +107,4 @@ theorem partial_union_Xj_up_Y_leq_epsilon : ∃ k : Set.Icc 1 n, μ (Y)  ≤
 
   exact ⟨N, hy⟩
   sorry
+-- Unfortunately, in the proof we stopped at this point due to issues in proving the above. The issue comes from ENNReal only thinking [1,n] can be empty. This is not the case as we want n to be an integer >_ 1. Despite adding hypotheses and trying to change the variables using this stipulation, further progress could not be achieved in proving this fact.
