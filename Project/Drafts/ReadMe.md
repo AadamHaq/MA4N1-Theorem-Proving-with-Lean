@@ -1,1 +1,1 @@
-All drafts from individuals before collating into main file
+All the drafts from individuals and group work before collating into the final lean code
