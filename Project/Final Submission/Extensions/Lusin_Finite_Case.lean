@@ -27,33 +27,33 @@ variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hfin : f '' B = 
 def A (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
 
 -- All of the previous lemmas and theorems are similar to the countable case, but with finite variables. The proofs are similar but there are some subtle differences.
-lemma Y_eq_union_Xj : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
-  rw[← Set.iUnion_inter Y (fun j ↦ g ⁻¹'({x j})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion x, ← hfin ]
+lemma B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
+  rw[← Set.iUnion_inter B (fun i ↦ f ⁻¹'({a i})), ← Set.preimage_iUnion, ← Set.range_eq_iUnion a, ← hfin ]
   simp only [Set.inter_eq_right]
-  simp_rw[Set.subset_preimage_image g Y]
+  simp_rw[Set.subset_preimage_image f B]
   done
 
-lemma measurable_Xj : ∀ (j : Set.Icc 1 n), MeasurableSet (X g x Y j) := by
-  intro y
-  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (x y)) hmg)) (hmy)
+lemma measurable_Ai : ∀ (i : Set.Icc 1 n), MeasurableSet (A f a B i) := by
+  intro b
+  apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (a b)) hmf)) (hmb)
   done
 
-theorem disjoint_Xj (i j : Set.Icc 1 n) (h : i ≠ j) :  X g x Y i ∩ X g x Y j= ∅ := by
-  unfold X
-  have hj : Disjoint (g ⁻¹' {x i}) (g ⁻¹' {x j}) := by
-    have hj2 : Disjoint {x i} {x j} := by
-      have neq : x i ≠ x j := by
-        exact Function.Injective.ne hinjx h
+theorem disjoint_Ai (i j : Set.Icc 1 n) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ := by
+  unfold A
+  have hj : Disjoint (f ⁻¹' {a i}) (f ⁻¹' {a j}) := by
+    have hj2 : Disjoint {a i} {a j} := by
+      have neq : a i ≠ a j := by
+        exact Function.Injective.ne hinja h
       rw[← Set.disjoint_singleton] at neq
       exact neq
-    exact Disjoint.preimage g hj2
+    exact Disjoint.preimage f hj2
   rw [@Set.inter_inter_inter_comm]
   simp
-  have ss := Set.inter_subset_left (g ⁻¹' {x i} ∩ g ⁻¹' {x j}) Y
+  have ss := Set.inter_subset_left (f ⁻¹' {a i} ∩ f ⁻¹' {a j}) B
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
 
-theorem monotone_Xj : Monotone (fun k => ⋃ j, ⋃ (_ : j ≤ k) , X g x Y j) := by
+theorem monotone_Ai : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
   intro a b
   simp only [ge_iff_le, not_le, Nat.lt_one_iff, gt_iff_lt, Set.mem_Icc,
@@ -64,42 +64,42 @@ theorem monotone_Xj : Monotone (fun k => ⋃ j, ⋃ (_ : j ≤ k) , X g x Y j) :
   exact hib
   done
 
-lemma element_subset_union_elements_fin (s: Set.Icc 1 n → Set α) (i : Set.Icc 1 n): s i ⊆ ⋃ j, ⋃ (_ : j ≤ i) , s j  := by
+lemma element_subset_union_elements_fin (s: Set.Icc 1 n → Set α) (i : Set.Icc 1 n): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , s i  := by
   apply Set.subset_biUnion_of_mem
   apply Nat.le_refl
   done
 
-lemma union_partial_eq_union_fin (s: Set.Icc 1 n → Set α): ⋃ j, s j =
- ⋃ j, (⋃ i, ⋃ (_ : i ≤ j) , s i ) := by
+lemma union_partial_eq_union_fin (s: Set.Icc 1 n → Set α): ⋃ i, s i =
+ ⋃ i, (⋃ j, ⋃ (_ : j ≤ i) , s j ) := by
   rw[superset_antisymm_iff]
   constructor
   simp only [Set.iUnion_subset_iff]
-  exact fun j j_1 _ => Set.subset_iUnion s j_1
+  exact fun i i_1 _ => Set.subset_iUnion s i_1
   simp only [Set.iUnion_subset_iff]
   intro t
   have hi := element_subset_union_elements_fin s t
   apply le_trans hi
-  exact Set.subset_iUnion (fun x =>  ⋃ i, ⋃ (_ : i ≤ x), s i) t
+  exact Set.subset_iUnion (fun a =>  ⋃ j, ⋃ (_ : j ≤ x), s j) t
   done
 
-lemma union_partial_Xj_eq_Y: ⋃ k,  ⋃ j, ⋃ (_ : j ≤ k), X g x Y j = Y := by
-  rw[(union_partial_eq_union_fin (X g x Y)).symm]
-  unfold X
-  apply Y_eq_union_Xj
+lemma union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := by
+  rw[(union_partial_eq_union_fin (A f a B)).symm]
+  unfold A
+  apply B_eq_union_Ai
   exact hfin
   done
 
-lemma continuity_of_measure_fin: Tendsto (fun k ↦ μ (⋃ j, ⋃ (_ : j ≤ k), X g x Y j))
-  atTop (𝓝 (μ (Y))) := by
-  nth_rw 2 [← union_partial_Xj_eq_Y g x Y hfin]
+lemma continuity_of_measure_fin: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i))
+  atTop (𝓝 (μ (B))) := by
+  nth_rw 2 [← union_partial_Ai_eq_B f a B hfin]
   apply tendsto_measure_iUnion
-  apply monotone_Xj
+  apply monotone_Ai
   done
 
-theorem partial_union_Xj_up_Y_leq_epsilon : ∃ k : Set.Icc 1 n, μ (Y)  ≤
-μ (⋃ j, ⋃ (_ : j ≤ k), X g x Y j) + ENNReal.ofReal (ε * (1/2))  := by
-  have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hg).1
-    (continuity_of_measure_fin μ g x Y hfin) (ENNReal.ofReal (ε * (1/2))) (by
+theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
+μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * (1/2))  := by
+  have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
+    (continuity_of_measure_fin μ f a B hfin) (ENNReal.ofReal (ε * (1/2))) (by
       rw [gt_iff_lt, ENNReal.ofReal_pos]
       exact mul_pos hε one_half_pos)
   have hl := (hN N le_rfl).1
