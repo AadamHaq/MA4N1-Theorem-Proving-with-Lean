@@ -1,4 +1,4 @@
-This GitHub repository is dedicated to proving Lusin's Theorem in Lean. An outline of the initial project is found within the [Lusin Theorem Project Plan pdf file](Lusins%20Theorem%20project%20outline.pdf). The file that proves [Egorov's Theorem](Project/egorov.lean) was used as inspiration and so has been uploaded. The original proof was made by Kexing Ying. 
+This GitHub repository is dedicated to proving Lusin's Theorem in Lean. An outline of the initial project is found within the [Lusin Theorem Project Plan pdf file](Lusins%20Theorem%20project%20outline.pdf). The file that proves [Egorov's Theorem](egorov.lean) was used as inspiration and so has been uploaded. The original proof was made by Kexing Ying. 
 
 We restrict our attention to the measure space $(\mathbb{R}, \mathcal{B}(\mathbb{R}), \mu)$. In particular, we concern ourselves only with the Borel $\sigma$-algebra for simplicity. 
 
