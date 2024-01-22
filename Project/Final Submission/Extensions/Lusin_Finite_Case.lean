@@ -64,7 +64,7 @@ theorem monotone_Ai : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) :
   exact hib
   done
 
-lemma element_subset_union_elements_fin (s: Set.Icc 1 n → Set α) (i : Set.Icc 1 n): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , s i  := by
+lemma element_subset_union_elements_fin (s: Set.Icc 1 n → Set α) (j : Set.Icc 1 n): s j ⊆ ⋃ i, ⋃ (_ : i ≤ j) , s i  := by
   apply Set.subset_biUnion_of_mem
   apply Nat.le_refl
   done
@@ -77,9 +77,9 @@ lemma union_partial_eq_union_fin (s: Set.Icc 1 n → Set α): ⋃ i, s i =
   exact fun i i_1 _ => Set.subset_iUnion s i_1
   simp only [Set.iUnion_subset_iff]
   intro t
-  have hi := element_subset_union_elements_fin s t
-  apply le_trans hi
-  exact Set.subset_iUnion (fun a =>  ⋃ j, ⋃ (_ : j ≤ x), s j) t
+  have hj := element_subset_union_elements_fin s t
+  apply le_trans hj
+  exact Set.subset_iUnion (fun x =>  ⋃ j, ⋃ (_ : j ≤ x), s j) t
   done
 
 lemma union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := by
