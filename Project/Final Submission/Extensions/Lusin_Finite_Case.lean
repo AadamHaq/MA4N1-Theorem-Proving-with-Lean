@@ -20,11 +20,11 @@ namespace Lusin
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
 -- Finite Case
-variable [BorelSpace ℝ] (g: α → ℝ) (x: Set.Icc 1 n → ℝ) (hinjx : Function.Injective x) (hmg: Measurable g)
-variable (Y : Set α)(hmy : MeasurableSet Y)(hg : μ Y ≠ ∞)(hfin : g '' Y = Set.range x)
+variable [BorelSpace ℝ] (f: α → ℝ) (a: Set.Icc 1 n → ℝ) (hinja : Function.Injective a) (hmf: Measurable f)
+variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hfin : f '' B = Set.range a)
 
 -- f takes finitely many values
-def X (j : Set.Icc 1 n) := g ⁻¹'({x j}) ∩ Y
+def A (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
 
 -- All of the previous lemmas and theorems are similar to the countable case, but with finite variables. The proofs are similar but there are some subtle differences.
 lemma Y_eq_union_Xj : ⋃ j, g ⁻¹'({x j}) ∩ Y = Y  := by
