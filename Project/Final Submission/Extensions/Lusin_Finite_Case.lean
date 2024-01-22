@@ -52,6 +52,7 @@ theorem disjoint_Ai (i j : Set.Icc 1 n) (h : i ≠ j) :  A f a B i ∩ A f a B j
   have ss := Set.inter_subset_left (f ⁻¹' {a i} ∩ f ⁻¹' {a j}) B
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
+  done
 
 theorem monotone_Ai : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
@@ -156,4 +157,54 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : Set.Icc 1 n) : ∃ K : Set 
   have HK4 := tsub_le_iff_left.mpr (le_of_lt HK3)
   rw[← hq] at HK4
   exact ⟨ K, HK1, HK2, HK4 ⟩
+  done
+
+theorem Ai_set_diff_compact_subset_Ai_leq_delta (δ : ℝ)(hδ : 0 < δ ): ∃ (K : Set.Icc 1 n → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
+  choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
+  exact ⟨K, hK⟩
+  done
+
+-- The following couple of theorems are the same for the finite case
+theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\b := by
+  exact (Set.diff_union_diff_cancel h2 h1).symm
+  done
+
+theorem subset_disjoint_subset_complement (a b c: Set α )(h : c ⊆ b)(hc : a ∩ b = ∅ ) : a ⊆ cᶜ := by
+  have dj : (a ∩ b = ∅) ↔ Disjoint a b := by
+    exact Iff.symm Set.disjoint_iff_inter_eq_empty
+  rw[dj] at hc
+  apply Set.Subset.trans (Disjoint.subset_compl_left (Disjoint.symm hc)) (Set.compl_subset_compl.mpr h)
+  done
+
+theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅) : a\b = a\c := by
+  have cb : cᶜ ⊆ bᶜ := by exact Set.compl_subset_compl.mpr h
+  have hr :  a \ c ∪ (a ∩ (c\b)) = a \ b := by
+    rw[Set.diff_eq_compl_inter, Set.diff_eq_compl_inter, Set.union_distrib_left, Set.union_distrib_right,
+    Set.union_self, Set.union_inter_cancel_right, Set.union_distrib_left, Set.union_distrib_right,
+    Set.union_distrib_right, Set.compl_union_self, Set.univ_inter, Set.union_eq_self_of_subset_left cb,
+     Set.inter_comm bᶜ (a ∪ bᶜ), Set.union_inter_cancel_right, Set.inter_comm bᶜ (a ∪ c), ← Set.inter_assoc,
+     Set.inter_comm a (a ∪ c), ←Set.diff_eq, Set.union_inter_cancel_left ]
+  rw[← hr,hz]
+  exact Set.union_empty (a \ c)
+  done
+
+theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h3 : a2 ∩ a1 = ∅):(a1 ∪ a2) \  (k1 ∪ k2) = (a1\k1) ∪ (a2 \ k2)   := by
+  have t1 := subset_disjoint_subset_complement a2 a1 k1 h1 h3
+  rw[Set.inter_comm] at h3
+  have t2 := subset_disjoint_subset_complement a1 a2 k2 h2 h3
+  rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2, ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
+  done
+
+theorem collection_disjoint_subset_union (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : (A (m + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ m), A i) = ∅ := by
+  have hj : ∀ i ≤ m, A (m+1) ∩ A i = ∅  := by
+    intro i
+    have neq (h : i ≤ m) :  i ≠ m+1  := by
+      aesop
+    have dsj2 (h: i ≠ m+1): Disjoint (A (m + 1)) (A i) := by
+      exact Set.disjoint_iff_inter_eq_empty.mpr (h2 (m + 1) i (id (Ne.symm h)))
+    exact fun a => Disjoint.inter_eq (dsj2 (neq a))
+    done
+  rw [@Set.inter_iUnion₂]
+  simp
+  exact hj
   done
