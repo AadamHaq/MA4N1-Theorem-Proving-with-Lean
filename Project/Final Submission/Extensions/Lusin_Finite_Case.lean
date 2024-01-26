@@ -285,3 +285,6 @@ theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a
   rw[hh9]
   exact continuousOn_empty f
   done
+
+theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: ∀ (i : Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Icc 0 N), K i ⊆ f ⁻¹'({a i })) : ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
+  sorry
