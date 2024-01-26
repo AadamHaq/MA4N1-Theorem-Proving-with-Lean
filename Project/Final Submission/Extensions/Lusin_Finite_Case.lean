@@ -228,4 +228,22 @@ theorem set_diff_union_n (N : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(K : Set.
 
 -- Don't think this theorem requires modification in the finite case?
 theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
-  sorry
+  induction' N with N ih
+  aesop
+  simp
+  rw [add_assoc, @add_left_comm, @one_add_mul, add_comm, ← Nat.add_one]
+  have h2 : ∑ i in Icc 0 (N + 1), m i = (∑ i in Icc 0 N , m i ) + m (N+1) := by
+    have hh2 : Icc 0 (N + 1) = (Icc 0 N) ∪ {N+1} := by
+      apply Finset.coe_injective; push_cast
+      have ge0 : 0 ≤ Nat.succ N := by aesop
+      rw[Set.union_singleton, Nat.add_one,← Nat.succ_eq_succ, ← Order.Icc_succ_right ge0]
+    rw[hh2]
+    rw[Finset.sum_union]
+    aesop
+    aesop
+  rw[h2]
+  have h3 : ∑ i in Icc 0 N, m i + m (N + 1) ≤ (↑N + 1) * b + m (N+1) := by
+    exact add_le_add_right ih (m (N+1))
+  have h4 : (↑N+1)*b + m (N+1) ≤ (↑N+1)*b + b := by
+    exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
+  exact le_trans h3 h4
