@@ -225,7 +225,6 @@ theorem set_diff_union_n (N : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(K : Set.
 ⋃ i, ⋃ (_ : i ≤ N), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ N), A i)\(⋃ i, ⋃ (_ : i ≤ N), K i) := by
   sorry
 
-
 -- Don't think this theorem requires modification in the finite case?
 theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
   induction' N with N ih
@@ -247,3 +246,6 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
   have h4 : (↑N+1)*b + m (N+1) ≤ (↑N+1)*b + b := by
     exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
   exact le_trans h3 h4
+
+theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
+  sorry
