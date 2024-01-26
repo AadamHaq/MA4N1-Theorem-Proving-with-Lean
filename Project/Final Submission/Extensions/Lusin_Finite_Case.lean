@@ -247,6 +247,7 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
     exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
   exact le_trans h3 h4
 
+-- This theorem can also be kept the same
 theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
   rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
   have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
@@ -257,3 +258,7 @@ theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2
   aesop
   exact Nat.cast_add_one_pos N
   done
+
+-- now need results on the continuity of f|K:
+theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
+  sorry
