@@ -222,3 +222,7 @@ theorem disjoint_K (n : ℕ) (A : Set.Icc 1 n → Set α)(K : Set.Icc 1 n → Se
   have dsj2 (h: i ≠ n+1): Disjoint (A i) (A (n + 1))  := by
     exact Set.disjoint_iff_inter_eq_empty.mpr (h2 i (n + 1) h)
   exact fun a => Set.disjoint_of_subset (h1 i) (h1 (n + 1)) (dsj2 (neq a))
+
+
+theorem set_diff_union_n (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
+⋃ i, ⋃ (_ : i ≤ n), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n), K i) := by
