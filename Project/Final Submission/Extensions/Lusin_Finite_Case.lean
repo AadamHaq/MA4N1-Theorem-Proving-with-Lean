@@ -298,3 +298,10 @@ theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: 
     exact restriction_f_K_continuous  f (K i) (a i) h2
   exact LocallyFinite.continuousOn_iUnion lf (fun i => IsCompact.isClosed (h1 i)) h_cont
   done
+
+-- Statement of Lusin's Theorem for when f takes __finitely__ many values:
+-- for now I think it ought to be the same as for the countable case?
+theorem lusin_countable: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ ContinuousOn f K := by
+  have ⟨ N, HSD ⟩ := B_set_diff_Ai_leq_epsilon μ f a hmf B hmb hf hcount ε hε
+  have p : 0 < (ε / (2 * (N+1) )) := by
+  sorry
