@@ -261,4 +261,27 @@ theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2
 
 -- now need results on the continuity of f|K:
 theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
-  sorry
+  have hh1 : f '' K ⊆ {a} := by
+    exact Set.mapsTo'.mp s1
+  have hh2 : Set.range (Set.restrict K f)  = f '' K := by
+    aesop
+  have hh3 : Set.range (Set.restrict K f) ⊆ {a} := by
+    exact Eq.trans_subset hh2 hh1
+  have hh4 :=  Set.eq_or_ssubset_of_subset hh3
+  have hh5 : Set.restrict K f = Set.restrict K (fun _  ↦ a ) := by
+    exact Set.restrict_eq_iff.mpr s1
+  cases' hh4 with c1 c2
+  have hh6 : Continuous (Set.restrict K f ) := by
+    rw[hh5]
+    have hh7 : Continuous (Set.restrict K (fun _  ↦ a )) := by
+      rw [← @continuousOn_iff_continuous_restrict]
+      exact continuousOn_const
+    exact hh7
+  exact continuousOn_iff_continuous_restrict.mpr hh6
+  have hh8 : Set.range (Set.restrict K f) = ∅  := by
+    exact Set.ssubset_singleton_iff.mp c2
+  rw[Set.range_eq_empty_iff] at hh8
+  have hh9 : K = ∅ := by exact Set.isEmpty_coe_sort.mp hh8
+  rw[hh9]
+  exact continuousOn_empty f
+  done
