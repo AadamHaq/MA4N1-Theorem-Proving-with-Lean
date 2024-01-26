@@ -39,6 +39,7 @@ lemma measurable_Ai : ∀ (i : Set.Icc 1 n), MeasurableSet (A f a B i) := by
   apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (a b)) hmf)) (hmb)
   done
 
+-- Demonstrating the pairwise disjointness of A_1,...A_n
 theorem disjoint_Ai (i j : Set.Icc 1 n) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ := by
   unfold A
   have hj : Disjoint (f ⁻¹' {a i}) (f ⁻¹' {a j}) := by
@@ -111,8 +112,8 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
   -/
   sorry
 
-/--/ Unfortunately, in the proof we stopped at this point due to issues in proving the above. The issue comes from ENNReal only thinking [1, n] can be empty. This can be seen by uncommenting the 'proof' above.
-This is not the case as we want n to be an integer >_ 1. Despite adding hypotheses and trying to change the variables using this stipulation, further progress could not be achieved in proving this fact.
+/- The issue above most comes from ENNReal only thinking [1, n] can be empty. This can be seen by uncommenting the 'proof' above.
+This is not the case as we want n to be an integer ≥ 1. Despite adding hypotheses and trying to change the variables using this stipulation, further progress could not be achieved in proving this fact.
 -/
 
 -- Despite this, it was decided to continue the proof but with the previous proof 'sorry'd'
@@ -196,7 +197,8 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
   rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2, ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
   done
 
-theorem collection_disjoint_subset_union (m : Set.Icc 1 (n-1)) (A : Set.Icc 1 n → Set α)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : (A (m + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ m), A i) = ∅ := by
+theorem collection_disjoint_subset_union (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ) : (A (m + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ m), A i) = ∅ := by
+  /-
   have hj : ∀ i ≤ m, A (m+1) ∩ A i = ∅  := by
     intro i
     have neq (h : i ≤ m) :  i ≠ m+1  := by
@@ -209,3 +211,14 @@ theorem collection_disjoint_subset_union (m : Set.Icc 1 (n-1)) (A : Set.Icc 1 n 
   simp
   exact hj
   done
+  -/
+  sorry
+
+
+theorem disjoint_K (n : ℕ) (A : Set.Icc 1 n → Set α)(K : Set.Icc 1 n → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : ∀ i : Set.Icc 1 n,  Disjoint (K i) (K (n+1)) := by
+  intro i
+  have neq (h : i ≤ n) :  i ≠ n+1  := by
+    aesop
+  have dsj2 (h: i ≠ n+1): Disjoint (A i) (A (n + 1))  := by
+    exact Set.disjoint_iff_inter_eq_empty.mpr (h2 i (n + 1) h)
+  exact fun a => Set.disjoint_of_subset (h1 i) (h1 (n + 1)) (dsj2 (neq a))
