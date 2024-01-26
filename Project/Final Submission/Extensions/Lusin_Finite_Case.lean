@@ -248,4 +248,12 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
   exact le_trans h3 h4
 
 theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
-  sorry
+  rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
+  have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
+    have h2 := ENNReal.ofReal_coe_nat (N+1)
+    aesop
+  rw[h, ENNReal.div_self, one_mul]
+  simp
+  aesop
+  exact Nat.cast_add_one_pos N
+  done
