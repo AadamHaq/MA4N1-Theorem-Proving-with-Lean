@@ -13,7 +13,7 @@ set_option maxHeartbeats 0
 open MeasureTheory ENNReal Filter Finset BigOperators
 open scoped Topology
 
--- The aim of this lean file is to prove Lusin's Theorem in the finite case. The previous file works for countable values however does not fully work for the finite case. This file attemps to adapt the proof and rewrite it in terms of finite many values i.e. the function goes from [1, n] -> R rather than what was shown previously; N -> R
+-- The aim of this lean file is to prove Lusin's Theorem in the case where the function f takes finitely many values (i.e. NOT countably many values). The main file works for countable values however does not cover the finite case: this would not an issue from the perspective of a measure theory course, but of course is problem when working with Lean4. This file attemps to adapt the proof and rewrite it in terms of finite many values i.e. the function goes from [1, n] -> ℝ rather than what was shown previously; ℕ -> ℝ.
 
 namespace Lusin
 
@@ -33,6 +33,7 @@ lemma B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
   simp_rw[Set.subset_preimage_image f B]
   done
 
+-- Demonstrating the measurability of A_1,...,A_n
 lemma measurable_Ai : ∀ (i : Set.Icc 1 n), MeasurableSet (A f a B i) := by
   intro b
   apply MeasurableSet.inter ((MeasurableSet.preimage (MeasurableSet.singleton (a b)) hmf)) (hmb)
