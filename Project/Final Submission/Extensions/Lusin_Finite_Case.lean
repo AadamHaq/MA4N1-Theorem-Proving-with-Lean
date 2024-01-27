@@ -137,6 +137,8 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
   exact ⟨k, h5⟩
   done
 
+-- There was a similar issue with the above proof unfortunately
+
 theorem finite_Ai (i : Set.Icc 1 n) : μ (A f a B i) ≠ ∞ := by
   have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
@@ -189,27 +191,21 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
 
 
 -- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. Currently unsure as to how this can be resolved.
-theorem finite_collection_disjoint_subset_union
-(n : ℕ) (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)
-(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ):
-  (A ⟨m.val + 1, _⟩) ∩ (⋃ (i : Set.Icc 1 n), ⋃ (h : i ≤ m), A i) = ∅ := by
 
-  /-
-  have hj : ∀ i ≤ m, A (m+1) ∩ A i = ∅  := by
-    intro i
-    have neq (h : i ≤ m) :  i ≠ m+1  := by
-      aesop
-    have dsj2 (h: i ≠ m+1): Disjoint (A (m + 1)) (A i) := by
-      exact Set.disjoint_iff_inter_eq_empty.mpr (h2 (m + 1) i (id (Ne.symm h)))
-    exact fun a => Disjoint.inter_eq (dsj2 (neq a))
-    done
-  rw [@Set.inter_iUnion₂]
-  simp
-  exact hj
+theorem finite_collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α) (h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅): (A (n + 1)) ∩ (⋃ i : Fin n, A i) = ∅ := by
+/-
+  have hj : ∀ (i : Fin n), A (n + 1) ∩ A i = ∅
+  { intros i
+    have neq : (i : ℕ) ≠ n + 1 := ne_of_lt i.2
+    have dsj2 : disjoint (A (n + 1)) (A i) := disjoint_iff_inter_eq_empty.mp (h2 _ _ neq)
+    exact set.disjoint_iff_inter_eq_empty.mp dsj2 }
+  rw [set.inter_Union]
+  simp [hj]
   done
-  -/
+-/
   sorry
 
+-- This theorem section is slightly odd as it is impossible to have a case where n+1 is in the function as the maximum value has to be n. After looking on MathLib for a while, Fin n was found. With this, it may be possible to proceed, however if this is the case, perhaps the entire function for A will have to be redefined in the variables.
 
 theorem disjoint_K (n : ℕ) (A : Set.Icc 1 n → Set α)(K : Set.Icc 1 n → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ) : ∀ i j : Set.Icc 1 n,  Disjoint (K i) (K (j)) := by
   sorry
