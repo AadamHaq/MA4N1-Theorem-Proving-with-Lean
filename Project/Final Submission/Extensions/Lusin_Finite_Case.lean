@@ -199,9 +199,10 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
 
 
 -- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. Currently unsure as to how this can be resolved.
-theorem collection_disjoint_subset_union (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)
+theorem finite_collection_disjoint_subset_union
+(n : ℕ) (A : Set.Icc 1 n → Set α)
 (h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ):
-  (A (m)) ∩ (⋃ i, ⋃ (_ : i ≤ m), A i) = ∅ := by
+  (A ⟨n + 1, _⟩) ∩ (⋃ i , ⋃ (h : (i ∈ Set.Icc 1 n) ≤ (n ∈ Set.Icc 1 n)), A i) = ∅ := by
   /-
   have hj : ∀ i ≤ m, A (m+1) ∩ A i = ∅  := by
     intro i
