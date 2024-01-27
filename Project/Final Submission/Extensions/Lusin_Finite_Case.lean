@@ -207,8 +207,15 @@ theorem finite_collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α) (
 
 -- This theorem section is slightly odd as it is impossible to have a case where n+1 is in the function as the maximum value has to be n. After looking on MathLib for a while, Fin n was found. With this, it may be possible to proceed, however if this is the case, perhaps the entire function for A will have to be redefined in the variables.
 
-theorem disjoint_K (n : ℕ) (A : Set.Icc 1 n → Set α)(K : Set.Icc 1 n → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ) : ∀ i j : Set.Icc 1 n,  Disjoint (K i) (K (j)) := by
+theorem disjoint_K (n : ℕ) (A K : ℕ → Set α)(h1 : ∀ i, K i ⊆ A i)(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅) : ∀ i : Fin n, Disjoint (K i) (K (n + 1)) := by
+/-
+  intros i
+  have neq : (i : ℕ) < n := i.is_lt
+  have dsj2 : A i ∩ A (n + 1) = ∅ := h2 i (Fin.last n) (ne_of_lt neq)
+-/
   sorry
+
+
 
 -- Changed this by introducing the variable N and modifying the bounds of each union accordingly
 theorem set_diff_union_n (N : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(K : Set.Icc 1 n → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ) :
