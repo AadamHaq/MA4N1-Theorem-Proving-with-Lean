@@ -127,17 +127,13 @@ lemma Ai_subset_B (N : Set.Icc 1 n) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B
 
 theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
   μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
-  /-
-  have ht := partial_union_Ai_up_B_leq_epsilon μ hn f a B hf hfin ε hε
-  let ⟨ k, h4 ⟩ := ht
-  have hq := measure_diff (Ai_subset_B f a B k) (partial_union_Ai_measurable f a hmf B hmb k)
-    (ne_top_of_lt (LE.le.trans_lt (measure_mono (Ai_subset_B f a B k)) (Ne.lt_top hf)))
+  obtain ⟨k, h4⟩ := partial_union_Ai_up_B_leq_epsilon μ hn f a B hf hfin ε hε
+  have hq := measure_diff (Ai_subset_B f a B k) (partial_union_Ai_measurable f a hmf B hmb k) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Ai_subset_B f a B k)) (Ne.lt_top hf)))
   have h5 := tsub_le_iff_left.mpr h4
-  rw[← hq] at h5
+  rw [← hq] at h5
   simp at h5
-  exact ⟨ k, h5 ⟩
-  -/
-  sorry
+  exact ⟨k, h5⟩
+  done
 
 -- There was a similar issue with the above proof unfortunately
 
