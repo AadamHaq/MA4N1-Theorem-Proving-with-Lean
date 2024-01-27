@@ -103,15 +103,16 @@ lemma continuity_of_measure_fin: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k)
 
 theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
 μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * (1/2))  := by
-  /-have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
+  have hn_nonempty : Nonempty (Set.Icc 1 n) := ⟨⟨1, by simp [hn]⟩⟩
+  have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
     (continuity_of_measure_fin μ f a B hfin) (ENNReal.ofReal (ε * (1/2))) (by
       rw [gt_iff_lt, ENNReal.ofReal_pos]
       exact mul_pos hε one_half_pos)
   have hl := (hN N le_rfl).1
   have hy := tsub_le_iff_right.mp hl
+
   exact ⟨N, hy⟩
-  -/
-  sorry
+  done
 
 /- The issue above most comes from ENNReal only thinking [1, n] can be empty. This can be seen by uncommenting the 'proof' above.
 This is not the case as we want n to be an integer ≥ 1. Despite adding hypotheses and trying to change the variables using this stipulation, further progress could not be achieved in proving this fact.
