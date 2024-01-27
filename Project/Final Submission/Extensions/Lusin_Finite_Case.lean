@@ -137,8 +137,6 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
   exact ⟨k, h5⟩
   done
 
--- There was a similar issue with the above proof unfortunately
-
 theorem finite_Ai (i : Set.Icc 1 n) : μ (A f a B i) ≠ ∞ := by
   have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
