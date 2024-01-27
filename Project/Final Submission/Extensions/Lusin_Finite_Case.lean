@@ -20,8 +20,10 @@ namespace Lusin
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
 -- Finite Case
+variable {n : ℕ} (hn : n ≥ 1)
 variable [BorelSpace ℝ] (f: α → ℝ) (a: Set.Icc 1 n → ℝ) (hinja : Function.Injective a) (hmf: Measurable f)
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hfin : f '' B = Set.range a)
+variable (ε : ℝ)(hε: 0 < ε)
 
 -- f takes finitely many values
 def A (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
@@ -107,7 +109,6 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
       exact mul_pos hε one_half_pos)
   have hl := (hN N le_rfl).1
   have hy := tsub_le_iff_right.mp hl
-
   exact ⟨N, hy⟩
   -/
   sorry
@@ -200,9 +201,10 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
 
 -- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. Currently unsure as to how this can be resolved.
 theorem finite_collection_disjoint_subset_union
-(n : ℕ) (A : Set.Icc 1 n → Set α)
+(n : ℕ) (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)
 (h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ):
-  (A ⟨n + 1, _⟩) ∩ (⋃ i , ⋃ (h : (i ∈ Set.Icc 1 n) ≤ (n ∈ Set.Icc 1 n)), A i) = ∅ := by
+  (A ⟨m.val + 1, _⟩) ∩ (⋃ (i : Set.Icc 1 n), ⋃ (h : i ≤ m), A i) = ∅ := by
+
   /-
   have hj : ∀ i ≤ m, A (m+1) ∩ A i = ∅  := by
     intro i
