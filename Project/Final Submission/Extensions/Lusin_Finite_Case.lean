@@ -112,7 +112,6 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
   have hy := tsub_le_iff_right.mp hl
 
   exact ⟨N, hy⟩
-  done
 
 theorem partial_union_Ai_measurable (N : Set.Icc 1 n): MeasurableSet (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
   apply Set.Finite.measurableSet_biUnion
@@ -127,8 +126,9 @@ lemma Ai_subset_B (N : Set.Icc 1 n) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B
   done
 
 theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
-μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
-  have ht := partial_union_Ai_up_B_leq_epsilon μ f a B hf hfin ε hε
+  μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
+  /-
+  have ht := partial_union_Ai_up_B_leq_epsilon μ hn f a B hf hfin ε hε
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (Ai_subset_B f a B k) (partial_union_Ai_measurable f a hmf B hmb k)
     (ne_top_of_lt (LE.le.trans_lt (measure_mono (Ai_subset_B f a B k)) (Ne.lt_top hf)))
@@ -136,7 +136,8 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
   rw[← hq] at h5
   simp at h5
   exact ⟨ k, h5 ⟩
-  done
+  -/
+  sorry
 
 -- There was a similar issue with the above proof unfortunately
 
