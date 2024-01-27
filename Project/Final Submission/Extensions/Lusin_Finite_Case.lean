@@ -20,10 +20,8 @@ namespace Lusin
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
 -- Finite Case
-variable {n : ℕ} (hn : n ≥ 1)
 variable [BorelSpace ℝ] (f: α → ℝ) (a: Set.Icc 1 n → ℝ) (hinja : Function.Injective a) (hmf: Measurable f)
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hfin : f '' B = Set.range a)
-variable (ε : ℝ)(hε: 0 < ε)
 
 -- f takes finitely many values
 def A (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
@@ -112,6 +110,7 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
   have hy := tsub_le_iff_right.mp hl
 
   exact ⟨N, hy⟩
+  done
 
 theorem partial_union_Ai_measurable (N : Set.Icc 1 n): MeasurableSet (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
   apply Set.Finite.measurableSet_biUnion
@@ -126,16 +125,19 @@ lemma Ai_subset_B (N : Set.Icc 1 n) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B
   done
 
 theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
-  μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
-  have ht := partial_union_Ai_up_B_leq_epsilon μ hn f a B hf hfin ε hε
+μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
+  /-
+  have ht := partial_union_Ai_up_B_leq_epsilon μ f a B hf hcount ε hε
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (Ai_subset_B f a B k) (partial_union_Ai_measurable f a hmf B hmb k)
     (ne_top_of_lt (LE.le.trans_lt (measure_mono (Ai_subset_B f a B k)) (Ne.lt_top hf)))
   have h5 := tsub_le_iff_left.mpr h4
-  rw [← hq] at h5
-  simp only [one_div] at h5
-  exact ⟨k, h5⟩
+  rw[← hq] at h5
+  simp at h5
+  exact ⟨ k, h5 ⟩
   done
+  -/
+  sorry
 
 -- There was a similar issue with the above proof unfortunately
 
@@ -191,11 +193,7 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
 
 
 -- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. Currently unsure as to how this can be resolved.
-theorem finite_collection_disjoint_subset_union
-(n : ℕ) (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)
-(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ):
-  (A ⟨m.val + 1, _⟩) ∩ (⋃ (i : Set.Icc 1 n), ⋃ (h : i ≤ m), A i) = ∅ := by
-
+theorem collection_disjoint_subset_union (m : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅ ) : (A (m + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ m), A i) = ∅ := by
   /-
   have hj : ∀ i ≤ m, A (m+1) ∩ A i = ∅  := by
     intro i
@@ -298,6 +296,4 @@ theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: 
 -- Statement of Lusin's Theorem for when f takes __finitely__ many values:
 -- for now I think it ought to be the same as for the countable case?
 theorem lusin_finite: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ ContinuousOn f K := by
-  have ⟨ N, HSD ⟩ := B_set_diff_Ai_leq_epsilon μ f a hmf B hmb hf hcount ε hε
-  have p : 0 < (ε / (2 * (N+1) )) := by
-  sorry
+sorry
