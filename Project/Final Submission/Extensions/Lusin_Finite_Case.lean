@@ -114,12 +114,6 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : Set.Icc 1 n, μ (B)  ≤
   exact ⟨N, hy⟩
   done
 
-/- The issue above most comes from ENNReal only thinking [1, n] can be empty. This can be seen by uncommenting the 'proof' above.
-This is not the case as we want n to be an integer ≥ 1. Despite adding hypotheses and trying to change the variables using this stipulation, further progress could not be achieved in proving this fact.
--/
-
--- Despite this, it was decided to continue the proof but with the previous proof 'sorry'd'
-
 theorem partial_union_Ai_measurable (N : Set.Icc 1 n): MeasurableSet (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
   apply Set.Finite.measurableSet_biUnion
   exact Set.finite_Iic N
@@ -134,8 +128,7 @@ lemma Ai_subset_B (N : Set.Icc 1 n) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B
 
 theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
 μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
-  /-
-  have ht := partial_union_Ai_up_B_leq_epsilon μ f a B hf hcount ε hε
+  have ht := partial_union_Ai_up_B_leq_epsilon μ f a B hf hfin ε hε
   let ⟨ k, h4 ⟩ := ht
   have hq := measure_diff (Ai_subset_B f a B k) (partial_union_Ai_measurable f a hmf B hmb k)
     (ne_top_of_lt (LE.le.trans_lt (measure_mono (Ai_subset_B f a B k)) (Ne.lt_top hf)))
@@ -144,8 +137,6 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
   simp at h5
   exact ⟨ k, h5 ⟩
   done
-  -/
-  sorry
 
 -- There was a similar issue with the above proof unfortunately
 
