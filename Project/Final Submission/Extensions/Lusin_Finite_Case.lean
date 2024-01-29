@@ -284,15 +284,15 @@ theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a
   done
 
 -- again, same as in main file
-theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: ∀ (i : Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Icc 0 N), K i ⊆ f ⁻¹'({a i })) : ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
+theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Set.Icc 0 N → Set α)(h1: ∀ (i : Set.Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Set.Icc 0 N), K i ⊆  f ⁻¹'{a ⟨(i : ℕ), _⟩}) : ContinuousOn f ((⋃ i : Set.Icc 0 N, K i)) := by
   have lf : LocallyFinite K := by
     exact locallyFinite_of_finite K
-  have h_cont : ∀ (i : Icc 0 N), ContinuousOn f (K i) := by
+  have h_cont : ∀ (i : Set.Icc 0 N), ContinuousOn f (K i) := by
     --use restriction_f_K_continuous here
     intro i
     specialize h1 i
     specialize h2 i
-    exact restriction_f_K_continuous  f (K i) (a i) h2
+    exact restriction_f_K_continuous  f (K i) (a ⟨(i : ℕ), _⟩) h2
   exact LocallyFinite.continuousOn_iUnion lf (fun i => IsCompact.isClosed (h1 i)) h_cont
   done
 
