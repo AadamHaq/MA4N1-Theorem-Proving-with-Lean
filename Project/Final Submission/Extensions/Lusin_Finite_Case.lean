@@ -19,14 +19,15 @@ namespace Lusin
 
 -- Calling universal variables
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
--- Finite Case
+
 variable {n : ℕ} (hn : n ≥ 1)
 variable [BorelSpace ℝ] (f: α → ℝ) (a: Set.Icc 1 n → ℝ) (hinja : Function.Injective a) (hmf: Measurable f)
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hfin : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
--- f takes finitely many values
+
 def A (i : Set.Icc 1 n) := f ⁻¹'({a i}) ∩ B
+-- An alternative way of expressing these functions are by making A: Fin n -> Set α instead. This may fix the errors around lines 190-220.
 
 -- All of the previous lemmas and theorems are similar to the countable case, but with finite variables. The proofs are similar but there are some subtle differences.
 lemma B_eq_union_Ai : ⋃ i, f ⁻¹'({a i}) ∩ B = B  := by
@@ -188,7 +189,6 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
   have t2 := subset_disjoint_subset_complement a1 a2 k2 h2 h3
   rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2, ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
   done
-
 
 -- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. Currently unsure as to how this can be resolved.
 
