@@ -280,7 +280,7 @@ theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a
   exact continuousOn_empty f
   done
 
--- Theorem + proof remains the same as in the countable case
+-- Similar to countable case, although there is an error in the theorem statement which we cannot seem to resolve.
 theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Set.Icc 0 N → Set α)(h1: ∀ (i : Set.Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Set.Icc 0 N), K i ⊆  f ⁻¹'{a ⟨(i : ℕ), _⟩}) : ContinuousOn f ((⋃ i : Set.Icc 0 N, K i)) := by
   have lf : LocallyFinite K := by
     exact locallyFinite_of_finite K
@@ -296,4 +296,73 @@ theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Set.Icc 0 N → Set α)(
 -- Statement of Lusin's Theorem for when f takes __finitely__ many values
 -- Due to the issues with some intermediate theorems, we were unable to progress with the proof of this main theorem.
 theorem lusin_finite: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K ) ≤ ENNReal.ofReal ε ∧ ContinuousOn f K := by
-  sorry
+  have ⟨ N, HSD ⟩ := B_set_diff_Ai_leq_epsilon μ f a hmf B hmb hf hcount ε hε
+  have p : 0 < (ε / (2 * (N+1) )) := by
+    apply(div_pos hε)
+    rw[zero_lt_mul_left]
+    exact Nat.cast_add_one_pos N
+    apply zero_lt_two
+    done
+  have ⟨ K , HK ⟩  := Ai_set_diff_compact_subset_Ai_leq_delta μ f a hmf B hmb  hf (ε/(2*(N+1))) p
+  choose HK1 HK2 HK3 using HK
+  have HK1' : ∀ i : Icc 0 N, K i ⊆ f ⁻¹'({a i }) := by
+    intro i
+    specialize HK1 i
+    unfold A at HK1
+    exact le_trans HK1 (Set.inter_subset_left (f ⁻¹' {a ↑i}) B)
+  have HK2' : ∀ i : Icc 0 N, IsCompact (K i) := by aesop
+  have KMP : IsCompact (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) := by
+    exact isCompact_iUnion HK2'
+  have SS : (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) ⊆ B := by
+    have hh1 :  ∀ i ≤ N, K i ⊆ A f a B i := by aesop
+    have hh2 : ∀ i ≤ N, A f a B i ⊆ B := by
+      intro i
+      unfold A
+      aesop
+    have hh3 : ∀ i ≤ N, K i ⊆ B := by
+      exact fun i a_1 => Set.Subset.trans (hh1 i a_1) (hh2 i a_1)
+    have _ := Set.iUnion₂_subset hh3
+    aesop
+  have S1 : μ (B\(⋃ i, ⋃ (_ : i ≤ N), K i)) ≤  μ (B\(⋃ i, ⋃ (_ : i ≤ N), A f a B i) )  + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ i, ⋃ (_ : i ≤ N), K i)) := by
+    have h2: (⋃ i, ⋃ (_ : i ≤ N), K i) ⊆ ⋃ i, ⋃ (_ : i ≤ N), A f a B i := by
+      simp
+      exact fun i i_1 => Set.subset_iUnion₂_of_subset i i_1 (HK1 i)
+    have SS1 := (Set.diff_union_diff_cancel (Ai_subset_B f a B N) h2).symm
+    have SS2 : μ ((B \ ⋃ (i : ℕ) (_ : i ≤ N), A f a B i) ∪ ((⋃ (i : ℕ) (_ : i ≤ N), A f a B i) \ ⋃ (i : ℕ) (_ : i ≤ N), K i)) ≤ μ (B \ ⋃ (i : ℕ) (_ : i ≤ N), A f a B i) + μ  ((⋃ (i : ℕ) (_ : i ≤ N), A f a B i) \ ⋃ (i : ℕ) (_ : i ≤ N), K i) := by
+      exact
+        measure_union_le (B \ ⋃ (i : ℕ) (_ : i ≤ N), A f a B i)
+          ((⋃ (i : ℕ) (_ : i ≤ N), A f a B i) \ ⋃ (i : ℕ) (_ : i ≤ N), K i)
+    rw[← SS1] at SS2
+    exact SS2
+  have S2 : μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i)\(⋃ (i ∈ Icc 0 N), K i)) ≤ ∑ i in Icc 0 N, μ ((A f a B i) \ (K i)) := by
+    have SS2 := set_diff_union_n N (A f a B) K HK1 (fun i j a_1 => disjoint_Ai f a hinj B i j a_1)
+    simp
+    rw[← SS2]
+    have h2 : μ (⋃ (i : ℕ) (_ : i ∈ Icc 0 N), (A f a B i \ K i)) ≤ ∑ i in Icc 0 N, μ (A f a B i \ K i) := by
+      exact measure_biUnion_finset_le (Icc 0 N) (fun i ↦(A f a B i \ K i) )
+    aesop
+  have S3 : ∑ i in Icc 0 N, μ ((A f a B i) \ (K i)) ≤  ENNReal.ofReal (ε/2) := by
+    have SS3 := upper_bound_sum N (ENNReal.ofReal (ε/(2*(N+1)))) (fun i ↦ μ ((A f a B i) \ (K i))) HK3
+    simp at SS3
+    rw[epsilon_ennreal_cancellation ε N] at SS3
+    exact SS3
+  have APP : μ (B \ ⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K i) ↑i)  ≤  ENNReal.ofReal ε := by
+    have P2 : μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) + μ ((⋃ i, ⋃ (_ : i ≤ N), A f a B i) \ ⋃ i, ⋃  (_ : i ≤ N), K i) ≤
+    ENNReal.ofReal ε := by
+      have H := le_trans (add_le_add_left S3 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i))) (add_le_add_right HSD (ENNReal.ofReal (ε / 2)))
+      rw[add_comm] at H
+      have HH := le_trans (add_le_add_right S2 (μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i)) ) H
+      have rε : ENNReal.ofReal (ε / 2) + ENNReal.ofReal (ε / 2) = ENNReal.ofReal ε := by
+        rw[ENNReal.ofReal_div_of_pos two_pos]
+        simp only [ofReal_ofNat, ENNReal.add_halves]
+      rw[rε , @add_comm] at HH
+      simp at HH
+      exact HH
+    have P3 : (B \ ⋃ (i : ℕ) (_ : i ≤ N), K i) = (B\ ⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i) := by
+      simp
+      unhygienic ext
+      simp_all only [Set.mem_diff, Set.mem_iUnion, Subtype.exists, mem_Icc, zero_le, true_and]
+    rw[P3] at S1
+    exact le_trans S1 P2
+  exact ⟨ (⋃ (i : { x // x ∈ Icc 0 N }), (fun i => K ↑i) i), SS, KMP,  APP, restriction_f_union_Ki_continuous f a N (fun (i : Icc 0 N) ↦ K i) HK2' HK1' ⟩
+  done
