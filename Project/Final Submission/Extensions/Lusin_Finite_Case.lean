@@ -13,7 +13,7 @@ set_option maxHeartbeats 0
 open MeasureTheory ENNReal Filter Finset BigOperators
 open scoped Topology
 
--- The aim of this lean file is to prove Lusin's Theorem in the case where the function f takes finitely many values (i.e. NOT countably many values). The main file works for countable values however does not cover the finite case: this would not an issue from the perspective of a measure theory course, but is problematic when working with Lean4. This file attemps to adapt the proof and rewrite it in terms of finite many values i.e. the function goes from [1, n] -> ℝ rather than what was shown previously; ℕ -> ℝ.
+-- The aim of this lean file is to prove Lusin's Theorem in the case where the function f takes finitely many values (i.e. NOT countably many values). The main file works for countable values, however does not cover the finite case. This would not be an issue from the perspective of a measure theory course, but is problematic when working with Lean4. This file attempts to adapt the proof from the main file to appeal to finiteness specifically, i.e. the function f : {1,...,n} → ℝ rather than what was shown previously, ℕ → ℝ.
 
 namespace Lusin
 
@@ -138,8 +138,6 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : Set.Icc 1 n,
   exact ⟨k, h5⟩
   done
 
--- There was a similar issue with the above proof unfortunately
-
 theorem finite_Ai (i : Set.Icc 1 n) : μ (A f a B i) ≠ ∞ := by
   have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
@@ -190,8 +188,7 @@ theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 �
   rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2, ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
   done
 
--- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. Currently unsure as to how this can be resolved.
-
+-- Issue with the below is that we are not able to add to elements of 'Set.Icc 1 n'. As mentioned in the ReadMe.md, the issue would most likely be resolved if we were to redo our code using the 'Fin n' variation as opposed to our current 'Set.Icc 1 n' formulation.
 theorem finite_collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α) (h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅): (A (n + 1)) ∩ (⋃ i : Fin n, A i) = ∅ := by
 /-
   have hj : ∀ (i : Fin n), A (n + 1) ∩ A i = ∅
@@ -205,8 +202,7 @@ theorem finite_collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α) (
 -/
   sorry
 
--- This theorem section is slightly odd as it is impossible to have a case where n+1 is in the function as the maximum value has to be n. After looking on MathLib for a while, Fin n was found. With this, it may be possible to proceed, however if this is the case, perhaps the entire function for A will have to be redefined in the variables.
-
+-- Similar issue to the above
 theorem disjoint_K (n : ℕ) (A K : ℕ → Set α)(h1 : ∀ i, K i ⊆ A i)(h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅) : ∀ i : Fin n, Disjoint (K i) (K (n + 1)) := by
 /-
   intros i
@@ -222,7 +218,7 @@ theorem set_diff_union_n (N : Set.Icc 1 n) (A : Set.Icc 1 n → Set α)(K : Set.
 ⋃ i, ⋃ (_ : i ≤ N), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ N), A i)\(⋃ i, ⋃ (_ : i ≤ N), K i) := by
   sorry
 
--- Don't think this theorem requires modification in the finite case?
+-- Theorem + proof remains the same as in the countable case
 theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
   induction' N with N ih
   aesop
@@ -244,7 +240,7 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
     exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
   exact le_trans h3 h4
 
--- This theorem can also be kept the same
+-- Theorem + proof remains the same as in the countable case
 theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
   rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
   have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
@@ -257,6 +253,7 @@ theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2
   done
 
 -- now need results on the continuity of f|K:
+-- Theorem + proof remains the same as in the countable case
 theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
   have hh1 : f '' K ⊆ {a} := by
     exact Set.mapsTo'.mp s1
@@ -283,7 +280,7 @@ theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a
   exact continuousOn_empty f
   done
 
--- again, same as in main file
+-- Theorem + proof remains the same as in the countable case
 theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Set.Icc 0 N → Set α)(h1: ∀ (i : Set.Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Set.Icc 0 N), K i ⊆  f ⁻¹'{a ⟨(i : ℕ), _⟩}) : ContinuousOn f ((⋃ i : Set.Icc 0 N, K i)) := by
   have lf : LocallyFinite K := by
     exact locallyFinite_of_finite K
