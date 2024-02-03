@@ -1,6 +1,6 @@
 This GitHub repository is dedicated to proving Lusin's Theorem in Lean. An outline of the initial project is found within the [Lusin Theorem Project Plan pdf file](Lusins%20Theorem%20project%20outline.pdf). The file that proves [Egorov's Theorem](egorov.lean) was used as inspiration and so has been added to this repo for reference. The original proof was made by Kexing Ying. 
 
-We restrict our attention to the measure space $(\mathbb{R}, \mathcal{B}(\mathbb{R}), \mu)$. In particular, we concern ourselves only with the Borel $\sigma$-algebra $\mathcal{B}(\mathbb{R})$ for simplicity. Note that this is a slight simplification of the theorem statement given in Cohn's "Measure Theory" book, which states the theorem for any $\mathcal{A}$ which contains the Borel $\sigma$-algebra.
+We restrict our attention to the measure space $(\mathbb{R}, \mathcal{B}(\mathbb{R}), \mu)$. In particular, we concern ourselves only with the Borel $\sigma$-algebra $\mathcal{B}(\mathbb{R})$ for simplicity. Note that this is a slight simplification of the theorem statement given in Cohn's "Measure Theory" book, which states the theorem for any $\sigma$-algebra $\mathcal{A}$ which contains the Borel $\sigma$-algebra.
 
 The theorem statement is as follows: Suppose that $f$ is a measurable function and $A \subset \mathbb{R}^d$ a Borel set with finite measure, i.e. $\mu(A) < \infty$. Then for all $\varepsilon > 0$, there exists a compact subset $K \subseteq A$ such that $\mu(A \backslash K) < \varepsilon$, such that the restriction of $f$ to the set $K$ is continuous.
 
