@@ -80,7 +80,7 @@ lemma element_subset_union_elements (s: ℕ → Set α) (j : ℕ): s j ⊆ ⋃ i
 
 
 /-
-The next seven lemmas/theorems are dedicated to proving that μ(⋃ A_i \ ⋃ A_k) < ε/2 for k ≤ n. The value of n is provided by the definition of the continuity of measure (i.e. ∀ ε, ∃ n such that...).
+The next seven lemmas/theorems are dedicated to proving that μ(⋃ A_i \ ⋃ A_k) < ε/2 for k ≤ N. The value of n is provided by the definition of the continuity of measure (i.e. ∀ ε, ∃ N ∈ ℕ such that...).
 -/
 
 -- A rather unusual-looking lemma, but this idea of rewriting into a double union is applied in the main result of this subsection.
@@ -105,7 +105,7 @@ lemma union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := 
   exact hcount
   done
 
--- Mathlib does indeed have the notion of the continuity of measure built-in, and so this is more of an ergonomic lemma for us, i.e. writing the result out in a way which is bespoke for our needs.
+-- Mathlib already has the notion of the continuity of measure built-in, and so this is more of an ergonomic lemma for us, i.e. writing the result out in a way which is bespoke for our needs.
 lemma continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i))
   atTop (𝓝 (μ (B))) := by
   nth_rw 2 [← union_partial_Ai_eq_B f a B hcount]
@@ -113,8 +113,8 @@ lemma continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A 
   apply monotone_Ai
   done
 
--- Introducing an ε/2 gap between the full union ⋃ A_i and the finite union A_1 ∪ ... ∪ A_k:
-theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : ℕ, μ (B)  ≤
+-- Introducing an ε/2 gap between the full union ⋃ A_i and the finite union A_1 ∪ ... ∪ A_k (final result in this chapter will use N rather than k):
+theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : ℕ, μ (B) ≤
 μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * (1/2))  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
     (continuity_of_measure μ f a B hcount) (ENNReal.ofReal (ε * (1/2))) (by
@@ -125,7 +125,7 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : ℕ, μ (B)  ≤
   exact ⟨N, hy⟩
   done
 
---- These results will be required to turns this result into a set difference
+-- Verifying that measurability still holds alongside our 'double union' trick:
 theorem partial_union_Ai_measurable (N : ℕ): MeasurableSet (⋃ i, ⋃ (_ : i ≤ N), A f a B i) := by
   apply Set.Finite.measurableSet_biUnion
   exact Set.finite_Iic N
@@ -138,7 +138,7 @@ lemma Ai_subset_B (N : ℕ) : ⋃ i, ⋃ (_ : i ≤ N) , A f a B i ⊆ B := by
   simp_all only [ne_eq, Set.iUnion_subset_iff, Set.inter_subset_right, implies_true, forall_const]
   done
 
---The final result
+--The final result of this first section. That is, finding a gap of measure ε/2 between the whole space ⋃ A_i and the finite union A_1 ∪ ... ∪ A_N:
 theorem B_set_diff_Ai_leq_epsilon : ∃ N : ℕ,
 μ (B \ ⋃ i, ⋃ (_ : i ≤ N), A f a B i) ≤ ENNReal.ofReal (ε/2) := by
   have ht := partial_union_Ai_up_B_leq_epsilon μ f a B hf hcount ε hε
@@ -153,18 +153,18 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : ℕ,
 
 
 /-
-We now turn our attention to the comapact subsets of each A_i, in order to achieve the bound μ(A_N \ K_N) ≤ ε/2N. We must first verify the existence of these compact subsets K_N, before once again applying continuity of measure for the desired bound. The bound in this case is not as simple as before, as our bound is now contingent on the value of N.
+We now turn our attention to the comapact subsets of each A_i, in order to achieve the bound μ(A_N \ K_N) ≤ ε/2N for each N. We must first verify the existence of these compact subsets K_N, before once again applying continuity of measure for the desired bound. The bound in this case is not as simple as before, as our bound now depends on N.
 -/
 
---Here we obtain the compact subsets K_i of A_i for each i, after two technical results
+-- Here we obtain the compact subsets K_i of A_i for each i, after two technical results
 theorem finite_Ai (i : ℕ) : μ (A f a B i) ≠ ∞ := by
   have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
   exact LT.lt.ne hy
   done
 
----We will take δ = ε/2N once N exists
-theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K ⊆ (A f a B i) ∧  IsCompact K ∧ μ ((A f a B i)\K) ≤  ENNReal.ofReal δ    := by
+-- We will take δ = ε/2N once the existance of the desired N is verified
+theorem compact_subset (δ : ℝ) (hδ : 0 < δ ) (i : ℕ) : ∃ K : Set α, K ⊆ (A f a B i) ∧ IsCompact K ∧ μ ((A f a B i)\K) ≤ ENNReal.ofReal δ:= by
   have ⟨ K, HK1, HK2, HK3 ⟩ := MeasurableSet.exists_isCompact_lt_add (measurable_Ai f a hmf B hmb i) (finite_Ai μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
   have hq := measure_diff (HK1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
   have HK4 := tsub_le_iff_left.mpr (le_of_lt HK3)
@@ -172,23 +172,23 @@ theorem compact_subset(δ : ℝ)(hδ : 0 < δ  )(i : ℕ) : ∃ K : Set α,  K �
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
-theorem Ai_set_diff_compact_subset_Ai_leq_delta (δ : ℝ)(hδ : 0 < δ ): ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i)\ (K i)) ≤  ENNReal.ofReal δ := by
+theorem Ai_set_diff_compact_subset_Ai_leq_delta (δ : ℝ) (hδ : 0 < δ) : ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i) \ (K i)) ≤ ENNReal.ofReal δ := by
   choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
   exact ⟨K, hK⟩
 
---These results will be needed to manipulate the sets
+-- These results will be needed to manipulate the sets
 theorem set_diff (b c a : Set α )(h1 : b ⊆ c)(h2: c ⊆ a) : a\b = a\c ∪ c\b := by
   exact (Set.diff_union_diff_cancel h2 h1).symm
   done
 
---subset_disjoint_subset_complement needed for set_diff_union_base_case
+-- subset_disjoint_subset_complement needed for set_diff_union_base_case
 theorem subset_disjoint_subset_complement (a b c: Set α )(h : c ⊆ b)(hc : a ∩ b = ∅ ) : a ⊆ cᶜ := by
   have dj : (a ∩ b = ∅) ↔ Disjoint a b := by
     exact Iff.symm Set.disjoint_iff_inter_eq_empty
   rw[dj] at hc
   apply Set.Subset.trans (Disjoint.subset_compl_left (Disjoint.symm hc)) (Set.compl_subset_compl.mpr h)
 
---This will be needed in the induction proof
+-- This will be needed in the induction proof
 theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅) : a\b = a\c := by
   have cb : cᶜ ⊆ bᶜ := by exact Set.compl_subset_compl.mpr h
   have hr :  a \ c ∪ (a ∩ (c\b)) = a \ b := by
@@ -201,14 +201,14 @@ theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅) : 
   exact Set.union_empty (a \ c)
   done
 
---This is the easier case of what we want to prove
+-- This is the easier case of what we want to prove
 theorem set_diff_union_base_case(a1 a2 k1 k2 : Set α)(h1: k1 ⊆ a1) (h2: k2 ⊆ a2) (h3 : a2 ∩ a1 = ∅):(a1 ∪ a2) \  (k1 ∪ k2) = (a1\k1) ∪ (a2 \ k2)   := by
   have t1 := subset_disjoint_subset_complement a2 a1 k1 h1 h3
   rw[Set.inter_comm] at h3
   have t2 := subset_disjoint_subset_complement a1 a2 k2 h2 h3
   rw[Set.diff_eq_compl_inter, Set.compl_union, Set.inter_distrib_left, Set.inter_assoc, Set.inter_assoc, Set.inter_comm k2ᶜ a2, ← Set.inter_assoc k1ᶜ a2 k2ᶜ, Set.inter_comm k1ᶜ a2, Set.inter_comm k2ᶜ a1, Set.inter_eq_self_of_subset_left t1, Set.inter_eq_self_of_subset_left t2, Set.inter_comm a2 k2ᶜ, ← Set.diff_eq_compl_inter, ← Set.diff_eq_compl_inter]
 
---This is the general version we need which should follow from set_diff_union_base_case using induction
+-- This is the general version we need which should follow from set_diff_union_base_case using induction
 theorem collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : (A (n + 1)) ∩ (⋃ i, ⋃ (_ : i ≤ n), A i) = ∅ := by
   have hj : ∀ i ≤ n, A (n+1) ∩ A i = ∅  := by
     intro i
