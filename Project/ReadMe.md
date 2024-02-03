@@ -6,7 +6,7 @@ We restrict our attention to the measure space $(\mathbb{R}, \mathcal{B}(\mathbb
 
 Our (slightly simplified) theorem statement is as follows: Suppose that $f$ is a measurable function and $A \subset \mathbb{R}^d$ a Borel set with finite measure, i.e. $\mu(A) < \infty$. Then for all $\varepsilon > 0$, there exists a compact subset $K \subseteq A$ such that $\mu(A \backslash K) < \varepsilon$, such that the restriction of $f$ to the set $K$ is continuous.
 
-### Main submission file
+## Main submission file
 Our final project file is titled **'Lusin_Theorem_Countable.lean'** and can be found directly in the 'Final Submission' folder of this repository.
 
 ## Limitations and extensions
