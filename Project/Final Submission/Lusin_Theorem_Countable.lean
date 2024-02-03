@@ -378,7 +378,7 @@ theorem lusin_countable: ∃ K : Set α, K ⊆ B ∧ IsCompact K ∧ μ (B \ K )
   have ⟨ N, HSD ⟩ := B_set_diff_Ai_leq_epsilon μ f a hmf B hmb hf hcount ε hε
   have p : 0 < (ε / (2 * (N+1) )) := by
     apply(div_pos hε)
-    rw[zero_lt_mul_left]
+    rw[mul_pos_iff_of_pos_left]
     exact Nat.cast_add_one_pos N
     apply zero_lt_two
     done
