@@ -14,17 +14,17 @@ open MeasureTheory ENNReal Filter Finset BigOperators
 open scoped Topology
 
 -- Aim is to prove Lusin's Theorem for the Borel sigma algebra specifically
--- This is slightly more restrictive than the theorem in Cohn's book
+-- This is slightly more restrictive than the theorem in Cohn's "Measure Theory" book
 
 namespace Lusin
 
--- Calling universal variables
+-- Calling universal variables:
 variable  {α : Type*} [TopologicalSpace α][T2Space α][LocallyCompactSpace α][MeasurableSpace α][BorelSpace α](μ: Measure α) [Measure.Regular μ]
 variable [BorelSpace ℝ] (f: α → ℝ) (a: ℕ → ℝ) (hinj : Function.Injective a) (hmf: Measurable f)
 variable (B : Set α)(hmb : MeasurableSet B)(hf : μ B ≠ ∞)(hcount : f '' B = Set.range a)
 variable (ε : ℝ)(hε: 0 < ε)
 
--- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, but we are using B here to avoid confusion.
+-- We define the sequence of sets A_i as follows. Note that the B we are referring to here is actually the Borel set mentioned in the theorem statement. In the statement it is referred to as A, and so we are using B here to avoid confusing it with the A_i.
 def A (i : ℕ) := f ⁻¹'({a i}) ∩ B
 
 
@@ -61,7 +61,7 @@ theorem disjoint_Ai (i j : ℕ) (h : i ≠ j) :  A f a B i ∩ A f a B j = ∅ :
   rw [@Set.disjoint_iff_inter_eq_empty] at hj
   exact Set.subset_eq_empty ss hj
 
--- Next we show partial unions of the elements of the sequence (A_i) are monotone.
+-- Next we show the mapping given by the partial unions of the elements of the sequence (A_i) are monotone. This mapping is used in the 'continuity_of_measure' lemma provided later.
 theorem monotone_Ai : Monotone (fun k => ⋃ i, ⋃ (_ : i ≤ k) , A f a B i) := by
   unfold Monotone
   intro x y
@@ -80,9 +80,10 @@ lemma element_subset_union_elements (s: ℕ → Set α) (j : ℕ): s j ⊆ ⋃ i
 
 
 /-
-The next seven lemmas/theorems are dedicated to proving our first result involving a gap of ε/2 between ⋃ A_i and the finite union ⋃ k ≤ n, A_k. The value of n is provided by the definition of the continuity of measure (i.e. ∀ ε, ∃ n such that...).
+The next seven lemmas/theorems are dedicated to proving that μ(⋃ A_i \ ⋃ A_k) < ε/2 for k ≤ n. The value of n is provided by the definition of the continuity of measure (i.e. ∀ ε, ∃ n such that...).
 -/
 
+-- A rather unusual-looking lemma, but this idea of rewriting into a double union is applied in the main result of this subsection.
 lemma union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
  ⋃ i, (⋃ j, ⋃ (_ : j ≤ i) , s j ) := by
   rw[superset_antisymm_iff]
@@ -96,6 +97,7 @@ lemma union_partial_eq_union (s: ℕ → Set α): ⋃ i, s i =
   exact Set.subset_iUnion (fun x =>  ⋃ j, ⋃ (_ : j ≤ x), s j) t
   done
 
+-- Verifying that this 'double union' formulation satisfies the same condition as in the standard union case:
 lemma union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := by
   rw[(union_partial_eq_union (A f a B)).symm]
   unfold A
@@ -103,6 +105,7 @@ lemma union_partial_Ai_eq_B: ⋃ k,  ⋃ i, ⋃ (_ : i ≤ k), A f a B i = B := 
   exact hcount
   done
 
+-- Mathlib does indeed have the notion of the continuity of measure built-in, and so this is more of an ergonomic lemma for us, i.e. writing the result out in a way which is bespoke for our needs.
 lemma continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i))
   atTop (𝓝 (μ (B))) := by
   nth_rw 2 [← union_partial_Ai_eq_B f a B hcount]
@@ -110,6 +113,7 @@ lemma continuity_of_measure: Tendsto (fun k ↦ μ (⋃ i, ⋃ (_ : i ≤ k), A 
   apply monotone_Ai
   done
 
+-- Introducing an ε/2 gap between the full union ⋃ A_i and the finite union A_1 ∪ ... ∪ A_k:
 theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : ℕ, μ (B)  ≤
 μ (⋃ i, ⋃ (_ : i ≤ k), A f a B i) + ENNReal.ofReal (ε * (1/2))  := by
   have ⟨N, hN⟩ := (ENNReal.tendsto_atTop hf).1
@@ -118,7 +122,6 @@ theorem partial_union_Ai_up_B_leq_epsilon : ∃ k : ℕ, μ (B)  ≤
       exact mul_pos hε one_half_pos)
   have hl := (hN N le_rfl).1
   have hy := tsub_le_iff_right.mp hl
-
   exact ⟨N, hy⟩
   done
 
