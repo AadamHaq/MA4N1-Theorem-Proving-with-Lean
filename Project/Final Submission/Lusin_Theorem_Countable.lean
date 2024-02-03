@@ -156,15 +156,15 @@ theorem B_set_diff_Ai_leq_epsilon : ∃ N : ℕ,
 We now turn our attention to the comapact subsets of each A_i, in order to achieve the bound μ(A_N \ K_N) ≤ ε/2N for each N. We must first verify the existence of these compact subsets K_N, before once again applying continuity of measure for the desired bound. The bound in this case is not as simple as before, as our bound now depends on N.
 -/
 
--- Here we obtain the compact subsets K_i of A_i for each i, after two technical results
+-- Verufying that each A_i has finite measure
 theorem finite_Ai (i : ℕ) : μ (A f a B i) ≠ ∞ := by
   have ss := Set.inter_subset_right (f ⁻¹' {a i}) B
   have hy := (measure_mono ss).trans_lt (Ne.lt_top hf)
   exact LT.lt.ne hy
   done
 
--- We will take δ = ε/2N once the existance of the desired N is verified
-theorem compact_subset (δ : ℝ) (hδ : 0 < δ ) (i : ℕ) : ∃ K : Set α, K ⊆ (A f a B i) ∧ IsCompact K ∧ μ ((A f a B i)\K) ≤ ENNReal.ofReal δ:= by
+-- We will take δ = ε/2N once the existance of the desired compact subset (and corresponding N) is verified
+theorem compact_subset (δ : ℝ) (hδ : 0 < δ) (i : ℕ) : ∃ K : Set α, K ⊆ (A f a B i) ∧ IsCompact K ∧ μ ((A f a B i) \ K) ≤ ENNReal.ofReal δ:= by
   have ⟨ K, HK1, HK2, HK3 ⟩ := MeasurableSet.exists_isCompact_lt_add (measurable_Ai f a hmf B hmb i) (finite_Ai μ f a B hf i) (zero_lt_iff.mp (ofReal_pos.mpr hδ))
   have hq := measure_diff (HK1) (IsCompact.measurableSet HK2) (ne_top_of_lt (LE.le.trans_lt (measure_mono (Set.Subset.trans HK1 (Set.inter_subset_right (f ⁻¹' {a i}) B))) (Ne.lt_top hf)))
   have HK4 := tsub_le_iff_left.mpr (le_of_lt HK3)
@@ -172,6 +172,7 @@ theorem compact_subset (δ : ℝ) (hδ : 0 < δ ) (i : ℕ) : ∃ K : Set α, K 
   exact ⟨ K, HK1, HK2, HK4 ⟩
   done
 
+-- Here we verify the existence the compact subsets K_i of A_i for each i
 theorem Ai_set_diff_compact_subset_Ai_leq_delta (δ : ℝ) (hδ : 0 < δ) : ∃ (K : ℕ → Set α), ∀ i, K i ⊆ (A f a B i) ∧ IsCompact (K i) ∧ μ ((A f a B i) \ (K i)) ≤ ENNReal.ofReal δ := by
   choose K hK using compact_subset μ f a hmf B hmb hf δ hδ
   exact ⟨K, hK⟩
@@ -189,7 +190,7 @@ theorem subset_disjoint_subset_complement (a b c: Set α )(h : c ⊆ b)(hc : a �
   apply Set.Subset.trans (Disjoint.subset_compl_left (Disjoint.symm hc)) (Set.compl_subset_compl.mpr h)
 
 -- This will be needed in the induction proof
-theorem set_diff_subset (a b c : Set α)(h : b ⊆ c)(hz : a ∩ (c\b) = ∅) : a\b = a\c := by
+theorem set_diff_subset (a b c : Set α) (h : b ⊆ c) (hz : a ∩(c \ b) = ∅) : a\b = a\c := by
   have cb : cᶜ ⊆ bᶜ := by exact Set.compl_subset_compl.mpr h
   have hr :  a \ c ∪ (a ∩ (c\b)) = a \ b := by
     rw[Set.diff_eq_compl_inter, Set.diff_eq_compl_inter, Set.union_distrib_left, Set.union_distrib_right,
@@ -222,7 +223,7 @@ theorem collection_disjoint_subset_union (n : ℕ) (A : ℕ → Set α)(h2 : ∀
   simp
   exact hj
 
--- Proof that if the A_i's are disjoint, then the compact subsets of the A_i's are also disjoint. This is used in the theorem after.
+-- Proof that if the A_i's are disjoint, then the compact subsets of the A_i's are also disjoint:
 theorem disjoint_K (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i)(h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) : ∀ i ≤ n,  Disjoint (K i) (K (n+1)) := by
   intro i
   have neq (h : i ≤ n) :  i ≠ n+1  := by
@@ -231,8 +232,8 @@ theorem disjoint_K (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i
     exact Set.disjoint_iff_inter_eq_empty.mpr (h2 i (n + 1) h)
   exact fun a => Set.disjoint_of_subset (h1 i) (h1 (n + 1)) (dsj2 (neq a))
 
--- Proof that for disjoint A_i with disjoint compact subsets K_i that the union of (A_i \ K_i) is the same as the union of A_i \ union of K_i. This is used in the final proof of Lusin's theorem.
-theorem set_diff_union_n (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 : ∀ i,  K i  ⊆ A i) (h2 : ∀ i j, i ≠ j → A i  ∩ A j = ∅ ) :
+-- Proof that for disjoint A_i with disjoint compact subsets K_i (verified in the previous theorem), the ⋃ (A_i \ K_i) is equal to (⋃ A_i) \ (⋃ K_i). This is used in the final proof of Lusin's theorem.
+theorem set_diff_union_n (n : ℕ) (A : ℕ → Set α) (K : ℕ → Set α) (h1 : ∀ i, K i ⊆ A i) (h2 : ∀ i j, i ≠ j → A i ∩ A j = ∅) :
 ⋃ i, ⋃ (_ : i ≤ n), ((A i)\(K i)) = (⋃ i, ⋃ (_ : i ≤ n), A i)\(⋃ i, ⋃ (_ : i ≤ n), K i) := by
   induction' n with n ih
   --base case
@@ -292,7 +293,7 @@ theorem set_diff_union_n (n : ℕ) (A : ℕ → Set α)(K : ℕ → Set α)(h1 :
   rw[s1,ih,s2,s3,s4]
   done
 
--- A fairly simple theorem that states if m_i <_ b for all i, then the sum from 0 to N of m_i is less than or equal to (N+1)*b. This is clear from the definitions of upper bounds. It is used in the final proof of Lusin's Theorem.
+-- A fairly simple theorem that states if m_i ≤ b for all i, then the sum from 0 to N of m_i ≤ (N+1)*b. This is clear from the definitions of upper bounds, but of course is not so easy to verify in Lean4. This result is used in the final proof of Lusin's Theorem.
 theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m i) ≤ b) : ∑ i in Icc 0 N, m i ≤ (N+1) * b := by
   induction' N with N ih
   aesop
@@ -314,7 +315,7 @@ theorem upper_bound_sum(N : ℕ)(b :ENNReal)(m : ℕ → ENNReal)(h : ∀ i, (m 
     exact add_le_add_left (h (N + 1)) ((↑N + 1) * b)
   exact le_trans h3 h4
 
--- Another simple theorem used in the final proof of Lusin's Theorem that cancels the constant in the denominator. It is a seperate theorem due to the technicalities of ENNReal.
+-- Another simple theorem used in the final proof of Lusin's Theorem that cancels the constant in the denominator. It is a seperate theorem due to the technicalities involved when working with ENNReal numbers (the extended non-negative numbers, [0,∞]).
 theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2*(↑N+1))) = ENNReal.ofReal (ε/2) := by
     rw[div_mul_eq_div_div, ENNReal.ofReal_div_of_pos, ← ENNReal.mul_comm_div]
     have h : ENNReal.ofReal (↑N + 1)  = ↑N + 1 := by
@@ -328,10 +329,10 @@ theorem epsilon_ennreal_cancellation (N : ℕ): (↑N + 1)*ENNReal.ofReal (ε/(2
 
 
 /-
-The final component of Lusin's Theorem pertains to demonstrating that f is continous when restricted to the set K = ⋃ K_i. This is proven using the two theorems below:
+The final component of Lusin's Theorem pertains to demonstrating that f is continous when restricted to the compact set K = ⋃ K_i. This is proven using the two theorems below:
 -/
 
---A proof that shows the restriction of the function f to just one of the sets K is continuous. This is used in the theorem after which is a generalisation.
+--A proof that shows the restriction of the function f to just one of the sets K is continuous. This is used in the theorem after, which is a generalisation.
 theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a})) : ContinuousOn f K := by
   have hh1 : f '' K ⊆ {a} := by
     exact Set.mapsTo'.mp s1
@@ -358,7 +359,7 @@ theorem restriction_f_K_continuous (K : Set α) (a : ℝ)(s1 : K ⊆ f ⁻¹'({a
   exact continuousOn_empty f
   done
 
--- This theorem then proves that f restricted to the union up to N of K sets is continuous. This is used in the final proof of Lusin's Theorem.
+-- This theorem then proves that f restricted to the union up to N of compact sets K_i is continuous. This is used in the final proof of Lusin's Theorem.
 theorem restriction_f_union_Ki_continuous (N : ℕ)(K : Icc 0 N → Set α)(h1: ∀ (i : Icc 0 N), IsCompact (K i))(h2 : ∀ (i : Icc 0 N), K i ⊆ f ⁻¹'({a i })) : ContinuousOn f ((⋃ i : Icc 0 N, K i)) := by
   have lf : LocallyFinite K := by
     exact locallyFinite_of_finite K
